@@ -1,79 +1,79 @@
-# 📁 Project Structure & Organization
+#  Project Structure & Organization
 
 Complete overview of the Travel PWA project organization.
 
 ---
 
-## 🗂️ Directory Structure
+##  Directory Structure
 
 ```
 travel-pwa/
-│
-├── 📂 src/                          # Source code
-│   ├── App.js                      # Main application (optimized)
-│   ├── App.css                     # Main styles
-│   ├── Login.js                    # Authentication UI
-│   ├── Login.css                   # Login styles
-│   ├── PlanSelection.js            # Plan selection screen
-│   ├── PlanSelection.css           # Plan selection styles
-│   ├── AuthContext.js              # Authentication state management
-│   ├── ErrorBoundary.js            # Error recovery component
-│   ├── firebase.js                 # Firebase configuration
-│   ├── index.js                    # App entry point
-│   ├── index.css                   # Global styles
-│   ├── reportWebVitals.js          # Performance monitoring
-│   ├── serviceWorkerRegistration.js # PWA service worker
-│   ├── service-worker.js           # Custom service worker
-│   └── setupTests.js               # Test configuration
-│
-├── 📂 public/                       # Static assets
-│   ├── index.html                  # HTML template
-│   ├── manifest.json               # PWA manifest
-│   ├── energy-fire-dynamic-force.svg # Logo/illustration
-│   ├── favicon.ico                 # Favicon
-│   ├── logo192.png                 # PWA icon (192x192)
-│   ├── logo512.png                 # PWA icon (512x512)
-│   └── robots.txt                  # SEO robots file
-│
-├── 📂 docs/                         # 📚 Documentation
-│   ├── README.md                   # Documentation index
-│   ├── PROJECT_STRUCTURE.md        # This file
-│   ├── architect-plan.md           # Original architecture plan
-│   ├── SECURITY_FIXES_SUMMARY.md   # Security improvements
-│   ├── PERFORMANCE_OPTIMIZATION_SUMMARY.md # Performance guide
-│   ├── DEPLOYMENT_READY_CHECKLIST.md # Deployment steps
-│   ├── FIREBASE_SECURITY_RULES.md  # Security rules docs
-│   └── 📂 assets/                  # Documentation assets
-│       └── colourTheme.png         # Color scheme reference
-│
-├── 📂 build/                        # Production build (generated)
-│   ├── index.html                  # Built HTML
-│   ├── static/                     # Optimized assets
-│   │   ├── css/                    # Minified CSS
-│   │   └── js/                     # Minified JS bundles
-│   ├── manifest.json               # Built manifest
-│   ├── service-worker.js           # Built service worker
-│   └── asset-manifest.json         # Asset mapping
-│
-├── 📂 node_modules/                 # Dependencies (auto-generated)
-│
-├── 📄 Configuration Files
-│   ├── package.json                # NPM dependencies & scripts
-│   ├── package-lock.json           # Locked dependencies
-│   ├── .env                        # Environment variables (SECRET!)
-│   ├── .gitignore                  # Git ignore rules
-│   ├── firebase.json               # Firebase configuration
-│   ├── .firebaserc                 # Firebase project config
-│   ├── database.rules.json         # Firebase security rules
-│   └── README.md                   # Main project README
-│
-└── 📂 .claude/                      # Claude Code settings (optional)
-    └── settings.local.json         # Local Claude settings
+
+  src/                          # Source code
+    App.js                      # Main application (optimized)
+    App.css                     # Main styles
+    Login.js                    # Authentication UI
+    Login.css                   # Login styles
+    PlanSelection.js            # Plan selection screen
+    PlanSelection.css           # Plan selection styles
+    AuthContext.js              # Authentication state management
+    ErrorBoundary.js            # Error recovery component
+    firebase.js                 # Firebase configuration
+    index.js                    # App entry point
+    index.css                   # Global styles
+    reportWebVitals.js          # Performance monitoring
+    serviceWorkerRegistration.js # PWA service worker
+    service-worker.js           # Custom service worker
+    setupTests.js               # Test configuration
+
+  public/                       # Static assets
+    index.html                  # HTML template
+    manifest.json               # PWA manifest
+    energy-fire-dynamic-force.svg # Logo/illustration
+    favicon.ico                 # Favicon
+    logo192.png                 # PWA icon (192x192)
+    logo512.png                 # PWA icon (512x512)
+    robots.txt                  # SEO robots file
+
+  docs/                         #  Documentation
+    README.md                   # Documentation index
+    PROJECT_STRUCTURE.md        # This file
+    architect-plan.md           # Original architecture plan
+    SECURITY_FIXES_SUMMARY.md   # Security improvements
+    PERFORMANCE_OPTIMIZATION_SUMMARY.md # Performance guide
+    DEPLOYMENT_READY_CHECKLIST.md # Deployment steps
+    FIREBASE_SECURITY_RULES.md  # Security rules docs
+     assets/                  # Documentation assets
+        colourTheme.png         # Color scheme reference
+
+  build/                        # Production build (generated)
+    index.html                  # Built HTML
+    static/                     # Optimized assets
+       css/                    # Minified CSS
+       js/                     # Minified JS bundles
+    manifest.json               # Built manifest
+    service-worker.js           # Built service worker
+    asset-manifest.json         # Asset mapping
+
+  node_modules/                 # Dependencies (auto-generated)
+
+  Configuration Files
+    package.json                # NPM dependencies & scripts
+    package-lock.json           # Locked dependencies
+    .env                        # Environment variables (SECRET!)
+    .gitignore                  # Git ignore rules
+    firebase.json               # Firebase configuration
+    .firebaserc                 # Firebase project config
+    database.rules.json         # Firebase security rules
+    README.md                   # Main project README
+
+  .claude/                      # Claude Code settings (optional)
+     settings.local.json         # Local Claude settings
 ```
 
 ---
 
-## 📚 Documentation Organization
+##  Documentation Organization
 
 All documentation is centralized in the `/docs` folder:
 
@@ -95,7 +95,7 @@ All documentation is centralized in the `/docs` folder:
 
 ---
 
-## 🔑 Key Files Explained
+##  Key Files Explained
 
 ### Source Code (`/src`)
 
@@ -140,7 +140,7 @@ All documentation is centralized in the `/docs` folder:
   - Environment variable configuration
   - Analytics setup (production only)
   - Auth and Database exports
-- **Security**: ✅ Uses env variables
+- **Security**:  Uses env variables
 
 ---
 
@@ -184,7 +184,7 @@ REACT_APP_FIREBASE_AUTH_DOMAIN=***
 # ... other Firebase config
 ```
 - **Purpose**: Secret configuration
-- **Security**: ✅ In .gitignore
+- **Security**:  In .gitignore
 - **Usage**: Loaded by Create React App
 
 #### **package.json** (NPM Config)
@@ -204,7 +204,7 @@ REACT_APP_FIREBASE_AUTH_DOMAIN=***
 
 ---
 
-## 🎨 Asset Organization
+##  Asset Organization
 
 ### Public Assets (`/public`)
 - **energy-fire-dynamic-force.svg** - Login page illustration
@@ -218,21 +218,21 @@ REACT_APP_FIREBASE_AUTH_DOMAIN=***
 
 ---
 
-## 📦 Build Output (`/build`)
+##  Build Output (`/build`)
 
 Generated by `npm run build`:
 
 ```
 build/
-├── index.html              # Entry point
-├── static/
-│   ├── css/
-│   │   └── main.[hash].css     # ~5 KB (gzipped)
-│   └── js/
-│       └── main.[hash].js      # ~158 KB (gzipped)
-├── service-worker.js       # Offline support
-├── manifest.json           # PWA config
-└── asset-manifest.json     # Asset mapping
+ index.html              # Entry point
+ static/
+    css/
+       main.[hash].css     # ~5 KB (gzipped)
+    js/
+        main.[hash].js      # ~158 KB (gzipped)
+ service-worker.js       # Offline support
+ manifest.json           # PWA config
+ asset-manifest.json     # Asset mapping
 ```
 
 ### Bundle Analysis
@@ -244,15 +244,15 @@ build/
 
 ---
 
-## 🔒 Security Organization
+##  Security Organization
 
 ### Protected Files (in `.gitignore`)
 ```
-.env                    # ✅ Environment secrets
-.env.local              # ✅ Local overrides
-node_modules/           # ✅ Dependencies
-build/                  # ✅ Build artifacts
-.firebase/              # ✅ Firebase cache
+.env                    #  Environment secrets
+.env.local              #  Local overrides
+node_modules/           #  Dependencies
+build/                  #  Build artifacts
+.firebase/              #  Firebase cache
 ```
 
 ### Security Components
@@ -263,7 +263,7 @@ build/                  # ✅ Build artifacts
 
 ---
 
-## 🚀 Optimization Organization
+##  Optimization Organization
 
 ### Performance Files
 - **App.js** - React.memo, useMemo optimizations
@@ -278,7 +278,7 @@ build/                  # ✅ Build artifacts
 
 ---
 
-## 📊 Code Organization Principles
+##  Code Organization Principles
 
 ### Component Structure
 ```javascript
@@ -311,35 +311,35 @@ export default Component;
 
 ---
 
-## 🎯 Best Practices Followed
+##  Best Practices Followed
 
 ### Code Organization
-✅ Separation of concerns (components, styles, config)
-✅ Consistent file naming
-✅ Centralized documentation
-✅ Environment-based configuration
+ Separation of concerns (components, styles, config)
+ Consistent file naming
+ Centralized documentation
+ Environment-based configuration
 
 ### Security
-✅ Secrets in environment variables
-✅ Security rules in separate file
-✅ .gitignore for sensitive files
-✅ Input sanitization centralized
+ Secrets in environment variables
+ Security rules in separate file
+ .gitignore for sensitive files
+ Input sanitization centralized
 
 ### Performance
-✅ Optimizations in source files
-✅ Production build optimization
-✅ Asset organization for caching
-✅ Service Worker for offline support
+ Optimizations in source files
+ Production build optimization
+ Asset organization for caching
+ Service Worker for offline support
 
 ### Documentation
-✅ All docs in `/docs` folder
-✅ Comprehensive README files
-✅ Code comments where needed
-✅ Deployment guides
+ All docs in `/docs` folder
+ Comprehensive README files
+ Code comments where needed
+ Deployment guides
 
 ---
 
-## 🔄 Workflow
+##  Workflow
 
 ### Development Workflow
 ```bash
@@ -367,7 +367,7 @@ export default Component;
 
 ---
 
-## 📝 Maintenance
+##  Maintenance
 
 ### Adding New Features
 1. Create component in `/src`
@@ -393,15 +393,15 @@ npm run build           # Test build
 
 ---
 
-## 🎉 Summary
+##  Summary
 
 **Well-Organized Project Structure:**
-- ✅ Clear separation of concerns
-- ✅ Comprehensive documentation
-- ✅ Security best practices
-- ✅ Performance optimizations
-- ✅ Easy to navigate
-- ✅ Production ready
+-  Clear separation of concerns
+-  Comprehensive documentation
+-  Security best practices
+-  Performance optimizations
+-  Easy to navigate
+-  Production ready
 
 **Total Files**: ~40 (excluding node_modules)
 **Total Size**: ~200 KB (source)

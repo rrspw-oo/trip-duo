@@ -58,19 +58,19 @@ firebase deploy
 
 ```
 src/
-├── components/          # React components
-│   ├── App.js          # Main app orchestrator
-│   ├── Login.js        # Google Sign-In UI
-│   ├── PlanSelection.js # Plan creation/join UI
-│   ├── common/         # Reusable UI components
-│   ├── flights/        # Flight booking components
-│   ├── dailyPlan/      # Daily planning components
-│   └── tabs/           # Tab page components
-├── styles/             # CSS stylesheets
-├── contexts/           # React Context (AuthContext)
-├── config/             # Firebase configuration
-├── constants/          # App-wide constants
-└── utils/              # Utility functions
+ components/          # React components
+    App.js          # Main app orchestrator
+    Login.js        # Google Sign-In UI
+    PlanSelection.js # Plan creation/join UI
+    common/         # Reusable UI components
+    flights/        # Flight booking components
+    dailyPlan/      # Daily planning components
+    tabs/           # Tab page components
+ styles/             # CSS stylesheets
+ contexts/           # React Context (AuthContext)
+ config/             # Firebase configuration
+ constants/          # App-wide constants
+ utils/              # Utility functions
 ```
 
 ## Database Structure

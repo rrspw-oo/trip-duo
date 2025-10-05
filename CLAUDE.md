@@ -9,9 +9,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Live Demo**: https://travel-fd.web.app
 **Firebase Project**: `travel-fd`
 
-**⚠️ SECURITY NOTE**: This project is NOT intended for public GitHub. All Firebase credentials are stored locally in `.env` file.
+** SECURITY NOTE**: This project is NOT intended for public GitHub. All Firebase credentials are stored locally in `.env` file.
 
-## ⚠️ IMPORTANT: Console Warnings
+##  IMPORTANT: Console Warnings
 
 ### Cross-Origin-Opener-Policy (COOP) Warning - SAFE TO IGNORE
 
@@ -28,10 +28,10 @@ cb=gapi.loaded_0?le=scs:195
 - This is **EXPECTED BEHAVIOR** from Google's OAuth security
 
 **Is This a Problem?**:
-- ❌ **NO** - Authentication works perfectly
-- ❌ **NO** - No security risk
-- ❌ **NO** - No functionality impact
-- ✅ **Safe to ignore** - This is a browser informational message, not an error
+-  **NO** - Authentication works perfectly
+-  **NO** - No security risk
+-  **NO** - No functionality impact
+-  **Safe to ignore** - This is a browser informational message, not an error
 
 **Why We Use Popup Mode**:
 1. **Better UX** - No page reload, instant feedback
@@ -63,9 +63,9 @@ Firebase: Error (auth/popup-closed-by-user)
 - Firebase throws this error
 
 **Is This a Problem?**:
-- ❌ **NO** - This is expected user behavior
-- ❌ **NO** - Not a technical error
-- ✅ **Already handled** - Error is silently caught and ignored in `AuthContext.js`
+-  **NO** - This is expected user behavior
+-  **NO** - Not a technical error
+-  **Already handled** - Error is silently caught and ignored in `AuthContext.js`
 
 **Error Handling**:
 ```javascript
@@ -102,37 +102,37 @@ firebase use travel-fd
 
 ```
 src/
-├── components/
-│   ├── App.js                      # Main app orchestrator
-│   ├── Login.js                    # Google Sign-In UI
-│   ├── PlanSelection.js            # Plan creation/join UI
-│   ├── ErrorBoundary.js            # Error recovery
-│   ├── common/                     # Reusable UI components
-│   │   └── CustomDropdown.js       # Custom select dropdown
-│   ├── flights/                    # Flight booking components
-│   │   ├── FlightForm.js           # Flight input form
-│   │   └── FlightCard.js           # Flight display card
-│   ├── dailyPlan/                  # Daily planning components
-│   │   ├── LocationForm.js         # Location input form
-│   │   ├── LocationCard.js         # Location display card
-│   │   └── DayAccordion.js         # Day accordion container
-│   └── tabs/                       # Tab page components
-│       ├── TravelTimeTab.js        # Tab 1: Date selection
-│       ├── FlightTab.js            # Tab 2: Flight booking
-│       ├── DailyPlanTab.js         # Tab 3: Daily itinerary
-│       └── EssentialsTab.js        # Tab 4: Packing list
-├── styles/                         # CSS stylesheets
-├── contexts/                       # React Context (AuthContext)
-├── config/                         # Firebase configuration
-├── constants/                      # App-wide constants
-│   └── options.js                  # Dropdown options, tabs config
-├── utils/                          # Utility functions
-│   ├── dateHelpers.js              # Date calculation utilities
-│   ├── inviteCodeGenerator.js     # Secure code generation
-│   ├── firebaseHelpers.js          # User avatar utilities
-│   ├── reportWebVitals.js          # Performance monitoring
-│   └── serviceWorker.js            # PWA service worker
-└── docs/                           # Documentation
+ components/
+    App.js                      # Main app orchestrator
+    Login.js                    # Google Sign-In UI
+    PlanSelection.js            # Plan creation/join UI
+    ErrorBoundary.js            # Error recovery
+    common/                     # Reusable UI components
+       CustomDropdown.js       # Custom select dropdown
+    flights/                    # Flight booking components
+       FlightForm.js           # Flight input form
+       FlightCard.js           # Flight display card
+    dailyPlan/                  # Daily planning components
+       LocationForm.js         # Location input form
+       LocationCard.js         # Location display card
+       DayAccordion.js         # Day accordion container
+    tabs/                       # Tab page components
+        TravelTimeTab.js        # Tab 1: Date selection
+        FlightTab.js            # Tab 2: Flight booking
+        DailyPlanTab.js         # Tab 3: Daily itinerary
+        EssentialsTab.js        # Tab 4: Packing list
+ styles/                         # CSS stylesheets
+ contexts/                       # React Context (AuthContext)
+ config/                         # Firebase configuration
+ constants/                      # App-wide constants
+    options.js                  # Dropdown options, tabs config
+ utils/                          # Utility functions
+    dateHelpers.js              # Date calculation utilities
+    inviteCodeGenerator.js     # Secure code generation
+    firebaseHelpers.js          # User avatar utilities
+    reportWebVitals.js          # Performance monitoring
+    serviceWorker.js            # PWA service worker
+ docs/                           # Documentation
 ```
 
 ### Core Data Flow
@@ -234,10 +234,10 @@ This generates:
 The app has been refactored from a monolithic 1,486-line App.js to a modular architecture:
 
 **Principles**:
-- ✅ **No design changes** - UI/UX remains identical
-- ✅ **No functionality changes** - All features work exactly as before
-- ✅ **Improved reusability** - Components can be reused across the app
-- ✅ **Better maintainability** - Easier to locate and modify code
+-  **No design changes** - UI/UX remains identical
+-  **No functionality changes** - All features work exactly as before
+-  **Improved reusability** - Components can be reused across the app
+-  **Better maintainability** - Easier to locate and modify code
 
 **What Was Modularized**:
 

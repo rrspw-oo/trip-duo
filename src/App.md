@@ -4,16 +4,16 @@ Main application component containing all travel planning features.
 
 ---
 
-## 📋 Overview
+##  Overview
 
 **File**: `App.js`
 **Lines**: ~1,500
 **Type**: React Functional Component
-**Status**: ✅ Production Ready
+**Status**:  Production Ready
 
 ---
 
-## 🎯 Features
+##  Features
 
 ### Tab 1: Travel Dates
 - Date range selection
@@ -32,7 +32,7 @@ Main application component containing all travel planning features.
 - Location management
 - Transportation tracking
 - Time period organization
-- Categories (景點/美食/購物/住宿)
+- Categories (///)
 
 ### Tab 4: Travel Essentials
 - Checklist management
@@ -42,7 +42,7 @@ Main application component containing all travel planning features.
 
 ---
 
-## 🔧 Technical Details
+##  Technical Details
 
 ### State Management
 ```javascript
@@ -100,14 +100,14 @@ const sortedEssentials = useMemo(() => {
 
 ---
 
-## 🔐 Security Features
+##  Security Features
 
 ### Input Sanitization
 ```javascript
 import DOMPurify from "dompurify";
 
 // Sanitize all user-generated content
-<td dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(flight.comment || "無") }} />
+<td dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(flight.comment || "") }} />
 <h4 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(location.name) }} />
 <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(itemData.text) }} />
 ```
@@ -143,19 +143,19 @@ if (invite.expiresAt && Date.now() > invite.expiresAt) {
 
 ---
 
-## 🎨 Component Structure
+##  Component Structure
 
 ### Main Component Hierarchy
 ```
 App
-├── Header (with user info & logout)
-├── PlanSelection (if no plan selected)
-└── Main Content (if plan selected)
-    ├── Tab Navigation
-    ├── Tab1 (Travel Dates)
-    ├── Tab2 (Flights)
-    ├── Tab3 (Itinerary)
-    └── Tab4 (Essentials)
+ Header (with user info & logout)
+ PlanSelection (if no plan selected)
+ Main Content (if plan selected)
+     Tab Navigation
+     Tab1 (Travel Dates)
+     Tab2 (Flights)
+     Tab3 (Itinerary)
+     Tab4 (Essentials)
 ```
 
 ### Sub-Components
@@ -169,7 +169,7 @@ const LocationCard = ({ location, day, index }) => { ... };
 
 ---
 
-## 📊 Data Flow
+##  Data Flow
 
 ### User Creates Plan
 ```
@@ -197,9 +197,9 @@ User A edits → Firebase → User B's listener → UI update
 
 ---
 
-## 🐛 Bug Fixes Applied
+##  Bug Fixes Applied
 
-### ✅ Race Condition Fixed
+###  Race Condition Fixed
 ```javascript
 // Added isMounted flag
 let isMounted = true;
@@ -211,7 +211,7 @@ const checkUserPlan = async () => {
 return () => { isMounted = false; };
 ```
 
-### ✅ Infinite Loop Prevention
+###  Infinite Loop Prevention
 ```javascript
 // Added ref to track Firebase updates
 const isUpdatingFromFirebase = useRef(false);
@@ -222,7 +222,7 @@ if (planId && !isUpdatingFromFirebase.current) {
 }
 ```
 
-### ✅ Memory Leak Fixed
+###  Memory Leak Fixed
 ```javascript
 // Proper event listener cleanup
 useEffect(() => {
@@ -234,7 +234,7 @@ useEffect(() => {
 }, []); // Empty deps - add once, remove on unmount
 ```
 
-### ✅ Null Safety Added
+###  Null Safety Added
 ```javascript
 const openCommentModal = (id) => {
   const flight = flights.find((f) => f.id === id);
@@ -249,7 +249,7 @@ const openCommentModal = (id) => {
 
 ---
 
-## 🚀 Performance Metrics
+##  Performance Metrics
 
 ### Before Optimization
 - Firebase writes: ~10/second during editing
@@ -263,7 +263,7 @@ const openCommentModal = (id) => {
 
 ---
 
-## 📝 Key Functions
+##  Key Functions
 
 ### Plan Management
 - `handleCreatePlan()` - Create new travel plan
@@ -293,7 +293,7 @@ const openCommentModal = (id) => {
 
 ---
 
-## 🔗 Dependencies
+##  Dependencies
 
 ```javascript
 import React, { useState, useEffect, useRef, useMemo, memo } from "react";
@@ -306,7 +306,7 @@ import { database } from "./firebase"; // Firebase
 
 ---
 
-## 🎯 Future Improvements
+##  Future Improvements
 
 ### Potential Enhancements
 - [ ] Drag & drop for flights
@@ -324,7 +324,7 @@ import { database } from "./firebase"; // Firebase
 
 ---
 
-## 📚 Related Files
+##  Related Files
 
 - **App.css** - Component styles
 - **AuthContext.js** - Authentication state
@@ -335,7 +335,7 @@ import { database } from "./firebase"; // Firebase
 
 ---
 
-## 🔍 Debugging Tips
+##  Debugging Tips
 
 ### Check Firebase Connection
 ```javascript
@@ -358,7 +358,7 @@ useEffect(() => {
 
 ---
 
-## ⚠️ Known Issues
+##  Known Issues
 
 ### Minor Warnings (Non-breaking)
 - `EXPIRATION_TIME` assigned but never used (line 542)
@@ -368,7 +368,7 @@ useEffect(() => {
 
 ---
 
-## 📞 Support
+##  Support
 
 For issues or questions about this component:
 1. Check [Performance Guide](./docs/performance/PERFORMANCE_OPTIMIZATION_SUMMARY.md)
