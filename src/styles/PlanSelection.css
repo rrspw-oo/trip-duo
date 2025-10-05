@@ -1,0 +1,236 @@
+.plan-selection-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-secondary);
+  padding: var(--space-lg);
+}
+
+.plan-selection-card {
+  background: var(--surface-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  max-width: 600px;
+  width: 100%;
+  overflow: hidden;
+  animation: slideUp 0.4s ease-out;
+}
+
+.plan-selection-header {
+  background: var(--text-primary);
+  padding: var(--space-2xl);
+  text-align: center;
+  color: white;
+}
+
+.plan-selection-header h1 {
+  margin: 0 0 var(--space-sm) 0;
+  font-size: var(--font-3xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.plan-selection-header p {
+  margin: 0;
+  font-size: var(--font-base);
+  opacity: 0.9;
+}
+
+.plan-selection-content {
+  padding: var(--space-2xl);
+}
+
+.plan-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.plan-option-btn {
+  background: var(--surface-bg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.plan-option-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--notion-blue-text);
+}
+
+.plan-option-btn:active {
+  transform: translateY(-2px);
+}
+
+.create-btn:hover {
+  background: var(--notion-blue-bg);
+  border-color: var(--notion-blue-text);
+}
+
+.join-btn:hover {
+  background: var(--notion-green-bg);
+  border-color: var(--notion-green-text);
+}
+
+.plan-option-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-md);
+}
+
+.plan-option-btn h3 {
+  margin: 0 0 var(--space-sm) 0;
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.plan-option-btn p {
+  margin: 0;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: var(--space-md) 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.divider span {
+  padding: 0 var(--space-md);
+  color: var(--text-tertiary);
+  font-size: var(--font-sm);
+  font-weight: 600;
+}
+
+.join-plan-form {
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  margin-bottom: var(--space-lg);
+  padding: var(--space-sm);
+  transition: color var(--transition-base);
+  float: left;
+}
+
+.back-btn:hover {
+  color: var(--text-primary);
+}
+
+.join-plan-form h3 {
+  margin: 0 0 var(--space-sm) 0;
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  clear: both;
+}
+
+.join-plan-form p {
+  margin: 0 0 var(--space-xl) 0;
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+.invite-code-input {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-xl);
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-lg);
+  transition: all var(--transition-base);
+  font-family: monospace;
+}
+
+.invite-code-input:focus {
+  outline: none;
+  border-color: var(--notion-blue-text);
+  box-shadow: rgba(46, 170, 220, 0.35) 0px 0px 0px 3px;
+}
+
+.submit-join-btn {
+  width: 100%;
+  padding: var(--space-md) var(--space-xl);
+  background: var(--notion-green-bg);
+  color: var(--notion-green-text);
+  border: 2px solid var(--notion-green-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.submit-join-btn:hover:not(:disabled) {
+  background: var(--notion-green-text);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.submit-join-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-join-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .plan-selection-container {
+    padding: var(--space-md);
+  }
+
+  .plan-selection-header {
+    padding: var(--space-xl);
+  }
+
+  .plan-selection-header h1 {
+    font-size: var(--font-2xl);
+  }
+
+  .plan-selection-content {
+    padding: var(--space-xl);
+  }
+
+  .plan-option-icon {
+    font-size: 2.5rem;
+  }
+}

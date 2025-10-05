@@ -1,0 +1,100 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Full background gradient -->
+  <rect width="512" height="512" fill="url(#bgGradient)"/>
+
+  <!-- Main architectural buildings - MUCH LARGER, covering most of the canvas -->
+  <rect x="107" y="107" width="120" height="253" rx="16" fill="url(#buildingGradient1)" transform="rotate(-5 167 233.5)" />
+  <rect x="200" y="67" width="93" height="307" rx="16" fill="url(#buildingGradient2)" transform="rotate(3 246.5 220.5)" />
+  <rect x="280" y="133" width="107" height="227" rx="16" fill="url(#buildingGradient3)" transform="rotate(-2 333.5 246.5)" />
+
+  <!-- Large flowing bridge across bottom -->
+  <path d="M27 413C93 373 147 405 213 373C280 341 333 373 400 341C467 309 520 341 587 373" stroke="url(#bridgeGradient)" stroke-width="40" stroke-linecap="round" fill="none" opacity="0.9" />
+
+  <!-- Large geometric elements -->
+  <circle cx="80" cy="187" r="59" fill="url(#elementGradient1)" opacity="0.95" />
+  <polygon points="413,120 448,53 483,120" fill="url(#elementGradient2)" />
+
+  <!-- Thick flowing paths -->
+  <path d="M0 320C67 293 120 333 187 293C253 253 307 293 373 253" stroke="url(#pathGradient)" stroke-width="29" stroke-linecap="round" fill="none" opacity="0.75" />
+  <path d="M139 253C205 293 259 253 325 293C392 333 445 293 512 320" stroke="url(#pathGradient)" stroke-width="29" stroke-linecap="round" fill="none" opacity="0.75" />
+
+  <!-- Large urban accent -->
+  <ellipse cx="347" cy="80" rx="43" ry="29" fill="url(#accentGradient)" transform="rotate(15 347 80)" />
+
+  <!-- Large balance elements -->
+  <rect x="67" y="107" width="43" height="43" rx="8" fill="url(#balanceGradient1)" transform="rotate(45 88.5 128.5)" />
+  <circle cx="440" cy="413" r="27" fill="url(#balanceGradient2)" />
+
+  <!-- Wide bottom current covering edge -->
+  <path d="M-13 467C53 440 107 480 173 440C240 400 293 440 360 400C427 360 480 400 547 440" stroke="url(#currentGradient)" stroke-width="27" stroke-linecap="round" fill="none" opacity="0.8" />
+
+  <!-- Extra large decorative elements to fill space -->
+  <circle cx="440" cy="213" r="32" fill="url(#elementGradient1)" opacity="0.6" />
+  <circle cx="67" cy="400" r="40" fill="url(#balanceGradient2)" opacity="0.5" />
+  <rect x="400" y="320" width="32" height="32" rx="5" fill="url(#accentGradient)" transform="rotate(30 416 336)" opacity="0.7" />
+
+  <defs>
+    <radialGradient id="bgGradient" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#e1bee7" />
+      <stop offset="100%" stop-color="#ba68c8" />
+    </radialGradient>
+
+    <linearGradient id="buildingGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#607d8b" />
+      <stop offset="100%" stop-color="#455a64" />
+    </linearGradient>
+
+    <linearGradient id="buildingGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9575cd" />
+      <stop offset="100%" stop-color="#7e57c2" />
+    </linearGradient>
+
+    <linearGradient id="buildingGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#64b5f6" />
+      <stop offset="100%" stop-color="#42a5f5" />
+    </linearGradient>
+
+    <linearGradient id="bridgeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffb74d" />
+      <stop offset="50%" stop-color="#ffa726" />
+      <stop offset="100%" stop-color="#ff9800" />
+    </linearGradient>
+
+    <radialGradient id="elementGradient1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#aed581" />
+      <stop offset="100%" stop-color="#81c784" />
+    </radialGradient>
+
+    <linearGradient id="elementGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f48fb1" />
+      <stop offset="100%" stop-color="#f06292" />
+    </linearGradient>
+
+    <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#90caf9" />
+      <stop offset="50%" stop-color="#64b5f6" />
+      <stop offset="100%" stop-color="#42a5f5" />
+    </linearGradient>
+
+    <radialGradient id="accentGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffcc80" />
+      <stop offset="100%" stop-color="#ffb74d" />
+    </radialGradient>
+
+    <radialGradient id="balanceGradient1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ce93d8" />
+      <stop offset="100%" stop-color="#ba68c8" />
+    </radialGradient>
+
+    <radialGradient id="balanceGradient2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#80deea" />
+      <stop offset="100%" stop-color="#4dd0e1" />
+    </radialGradient>
+
+    <linearGradient id="currentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b39ddb" />
+      <stop offset="50%" stop-color="#9575cd" />
+      <stop offset="100%" stop-color="#7e57c2" />
+    </linearGradient>
+  </defs>
+</svg>

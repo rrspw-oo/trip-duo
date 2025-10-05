@@ -1,0 +1,114 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background organic shape - Noguchi inspired base -->
+  <path d="M20 64C20 35.5 35.5 20 64 20C92.5 20 108 35.5 108 64C108 92.5 92.5 108 64 108C35.5 108 20 92.5 20 64Z" fill="url(#energyBgGradient)" />
+  
+  <!-- Main flame form - abstract energy center -->
+  <path d="M55 82C50 78 52 70 58 68C62 66 64 62 68 64C72 62 74 66 78 68C84 70 86 78 81 82C79 84 75 83 73 80C71 82 67 82 65 80C63 82 59 82 57 80C55 83 51 84 53 82L55 82Z" fill="url(#flameGradient)" />
+  
+  <!-- Secondary flame layer - Noguchi flowing form -->
+  <path d="M60 65C58 60 62 55 68 57C72 59 74 55 78 57C84 59 88 60 86 65C84 67 80 66 78 63C76 65 72 65 70 63C68 65 64 65 62 63C60 66 56 67 58 65L60 65Z" fill="url(#flame2Gradient)" />
+  
+  <!-- Energy core - central element -->
+  <circle cx="68" cy="60" r="6" fill="url(#coreGradient)" />
+  
+  <!-- Radiating energy lines - Senda geometric play -->
+  <path d="M68 40C68 45 64 48 64 53" stroke="url(#energyLineGradient)" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+  <path d="M85 52C80 55 75 58 70 61" stroke="url(#energyLineGradient)" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+  <path d="M85 75C80 72 75 69 70 66" stroke="url(#energyLineGradient)" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+  <path d="M51 52C56 55 61 58 66 61" stroke="url(#energyLineGradient)" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+  
+  <!-- Organic heat waves - flowing elements -->
+  <path d="M30 45C36 40 44 45 50 40C56 35 64 40 70 35" stroke="url(#heatGradient)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.6" />
+  <path d="M58 98C64 93 72 98 78 93C84 88 92 93 98 88" stroke="url(#heatGradient)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.6" />
+  
+  <!-- Energy sparks - geometric accents -->
+  <polygon points="38,65 43,60 48,65 43,70" fill="url(#sparkGradient)" opacity="0.9" />
+  <polygon points="88,48 93,43 98,48 93,53" fill="url(#sparkGradient)" opacity="0.9" />
+  
+  <circle cx="45" cy="35" r="3" fill="url(#ember1Gradient)" opacity="0.8" />
+  <circle cx="92" cy="78" r="2.5" fill="url(#ember2Gradient)" opacity="0.8" />
+  
+  <!-- Noguchi balance elements - energy stones -->
+  <circle cx="35" cy="78" r="2" fill="url(#stone1Gradient)" />
+  <circle cx="95" cy="35" r="1.5" fill="url(#stone2Gradient)" />
+  
+  <!-- Flowing energy current - bottom element -->
+  <path d="M25 95C31 90 39 95 45 90C51 85 59 90 65 85C71 80 79 85 85 90C91 95 99 90 105 95" stroke="url(#currentGradient)" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.7" />
+  
+  <!-- Abstract energy burst - top accent -->
+  <ellipse cx="68" cy="28" rx="8" ry="5" fill="url(#burstGradient)" transform="rotate(15 68 28)" opacity="0.9" />
+  
+  <!-- Gradient definitions -->
+  <defs>
+    <radialGradient id="energyBgGradient" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#fff3e0" />
+      <stop offset="100%" stop-color="#ffe0b2" />
+    </radialGradient>
+    
+    <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ff3d00" />
+      <stop offset="30%" stop-color="#ff5722" />
+      <stop offset="70%" stop-color="#ff9800" />
+      <stop offset="100%" stop-color="#ffc107" />
+    </linearGradient>
+    
+    <linearGradient id="flame2Gradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ff6f00" />
+      <stop offset="50%" stop-color="#ff8f00" />
+      <stop offset="100%" stop-color="#ffb300" />
+    </linearGradient>
+    
+    <radialGradient id="coreGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff59d" />
+      <stop offset="50%" stop-color="#ffeb3b" />
+      <stop offset="100%" stop-color="#ffc107" />
+    </radialGradient>
+    
+    <linearGradient id="energyLineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffeb3b" />
+      <stop offset="100%" stop-color="#ffc107" />
+    </linearGradient>
+    
+    <linearGradient id="heatGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff8a80" />
+      <stop offset="50%" stop-color="#ff5252" />
+      <stop offset="100%" stop-color="#f44336" />
+    </linearGradient>
+    
+    <linearGradient id="sparkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffab40" />
+      <stop offset="100%" stop-color="#ff9800" />
+    </linearGradient>
+    
+    <radialGradient id="ember1Gradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff8a65" />
+      <stop offset="100%" stop-color="#ff5722" />
+    </radialGradient>
+    
+    <radialGradient id="ember2Gradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffcc02" />
+      <stop offset="100%" stop-color="#ff9800" />
+    </radialGradient>
+    
+    <radialGradient id="stone1Gradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8e24aa" />
+      <stop offset="100%" stop-color="#6a1b9a" />
+    </radialGradient>
+    
+    <radialGradient id="stone2Gradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#42a5f5" />
+      <stop offset="100%" stop-color="#1976d2" />
+    </radialGradient>
+    
+    <linearGradient id="currentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff7043" />
+      <stop offset="50%" stop-color="#ff5722" />
+      <stop offset="100%" stop-color="#e64a19" />
+    </linearGradient>
+    
+    <radialGradient id="burstGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff176" />
+      <stop offset="100%" stop-color="#ffeb3b" />
+    </radialGradient>
+  </defs>
+</svg>

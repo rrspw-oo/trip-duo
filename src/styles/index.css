@@ -1,0 +1,118 @@
+/* CSS Variables - Custom Color Theme */
+:root {
+  /* Custom Color Palette - Based on provided theme */
+  --color-mauve: #88596B;
+  --color-rose-pink: #D493B9;
+  --color-light-pink: #F3AAD5;
+  --color-medium-purple: #AA85CD;
+  --color-light-purple: #D2A7FD;
+  --color-terracotta: #DA896F;
+  --color-peachy-coral: #FF9F81;
+
+  /* Notion Color Palette - Updated with custom colors */
+  --notion-default-bg: #FFFFFF;
+  --notion-default-text: #88596B;
+  --notion-gray-bg: #F7F6F3;
+  --notion-gray-text: #88596B;
+  --notion-brown-bg: #F3EEEE;
+  --notion-brown-text: #88596B;
+  --notion-orange-bg: #FFE5DE;
+  --notion-orange-text: #DA896F;
+  --notion-yellow-bg: #FDECC8;
+  --notion-yellow-text: #DA896F;
+  --notion-green-bg: #E8DEEE;
+  --notion-green-text: #AA85CD;
+  --notion-blue-bg: #F3E5F5;
+  --notion-blue-text: #AA85CD;
+  --notion-purple-bg: #F3E5F5;
+  --notion-purple-text: #AA85CD;
+  --notion-pink-bg: #FCE4EC;
+  --notion-pink-text: #D493B9;
+  --notion-red-bg: #FFE5DE;
+  --notion-red-text: #FF9F81;
+
+  /* Surface Colors */
+  --surface-bg: #FFFFFF;
+  --surface-secondary: #FCF9FB;
+  --surface-hover: #F8F3F6;
+  --border-color: rgba(136, 89, 107, 0.12);
+  --divider-color: rgba(136, 89, 107, 0.12);
+
+  /* Text Colors */
+  --text-primary: #88596B;
+  --text-secondary: #AA85CD;
+  --text-tertiary: #D493B9;
+
+  /* Spacing Scale (8px grid) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Typography Scale */
+  --font-xs: 0.75rem;    /* 12px */
+  --font-sm: 0.875rem;   /* 14px */
+  --font-base: 1rem;     /* 16px */
+  --font-lg: 1.125rem;   /* 18px */
+  --font-xl: 1.25rem;    /* 20px */
+  --font-2xl: 1.5rem;    /* 24px */
+  --font-3xl: 1.875rem;  /* 30px */
+  --font-4xl: 2.25rem;   /* 36px */
+
+  /* Line Heights */
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  /* Border Radius - Notion uses subtle rounded corners */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-full: 9999px;
+
+  /* Shadows - Notion uses very subtle shadows */
+  --shadow-sm: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px;
+  --shadow-md: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+  --shadow-lg: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 5px 10px, rgba(15, 15, 15, 0.2) 0px 15px 40px;
+  --shadow-xl: rgba(15, 15, 15, 0.1) 0px 8px 16px, rgba(15, 15, 15, 0.1) 0px 16px 48px;
+
+  /* Transitions */
+  --transition-fast: 100ms ease;
+  --transition-base: 150ms ease;
+  --transition-slow: 200ms ease;
+
+  /* Z-index Scale */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-modal: 1300;
+  --z-tooltip: 1400;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: var(--font-base);
+  line-height: var(--leading-normal);
+  background: var(--surface-secondary);
+  min-height: 100vh;
+  color: var(--text-primary);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
