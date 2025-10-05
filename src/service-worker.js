@@ -39,8 +39,15 @@ registerRoute(
 
     if (url.pathname.match(fileExtensionRegexp)) {
       return false;
-    } // Return true to signal that we want to use the handler.
+    }
 
+    // IMPORTANT: Skip caching when launched from PWA with auth check
+    // This prevents login loop when user has auth state but SW serves cached login page
+    if (url.search.includes('source=pwa')) {
+      return false; // Force network request to check current auth state
+    }
+
+    // Return true to signal that we want to use the handler.
     return true;
   },
   createHandlerBoundToURL(process.env.PUBLIC_URL + '/index.html')

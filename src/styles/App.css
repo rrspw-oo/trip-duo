@@ -1480,35 +1480,259 @@
 
 /* Flight Card Styles */
 .flights-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
 }
 
-.flight-card {
+/* Airline Group */
+.airline-group {
   background: var(--surface-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  overflow: hidden;
+}
+
+.airline-group-header {
+  background: var(--surface-secondary);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.airline-group-header h3 {
+  margin: 0;
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.airline-flights {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .airline-flights {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0;
+  }
+}
+
+/* Flight Option Card */
+.flight-option-card {
+  background: var(--surface-bg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
   transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.flight-option-card:hover {
+  background: var(--surface-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--text-tertiary);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .flight-option-card {
+    border: none;
+    border-bottom: 1px solid var(--divider-color);
+    border-radius: 0;
+  }
+
+  .flight-option-card:last-child {
+    border-bottom: none;
+  }
+
+  .flight-option-card:hover {
+    box-shadow: none;
+  }
+}
+
+.flight-option-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  gap: var(--space-sm);
+}
+
+.flight-price-badge {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--notion-green-text);
+  background: var(--notion-green-bg);
+  padding: 6px var(--space-md);
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+}
+
+.icon-btn-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border-radius: var(--radius-md);
+}
+
+.icon-btn-compact:hover {
+  color: var(--text-primary);
+  background: var(--hover-bg);
+  transform: scale(1.1);
+}
+
+.icon-btn-compact:active {
+  transform: scale(1);
+}
+
+.icon-btn-compact.danger:hover {
+  color: var(--notion-red-text);
+  background: var(--notion-red-bg);
+}
+
+.flight-option-times {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.flight-time-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.flight-time-label {
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  background: var(--surface-secondary);
+  padding: 4px var(--space-sm);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-xs);
+  max-width: 150px;
+}
+
+.time-label-compact {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.time-value-compact {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-feature-settings: 'tnum';
+  letter-spacing: -0.02em;
+}
+
+/* Old flight card (backup, can be removed later) */
+.flight-card {
+  background: var(--surface-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--space-lg);
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.flight-card:first-child {
+  border-top: 1px solid var(--border-color);
 }
 
 .flight-card:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: var(--text-tertiary);
-  transform: translateY(-2px);
+  background: var(--surface-secondary);
 }
 
 .flight-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: var(--space-lg);
   padding-bottom: var(--space-md);
   border-bottom: 2px solid var(--divider-color);
+  gap: var(--space-md);
+}
+
+.flight-card-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 0; /* Allows text to shrink properly */
+}
+
+.flight-card-header-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border-radius: var(--radius-sm);
+}
+
+.icon-btn:hover {
+  color: var(--text-primary);
+  background: var(--hover-bg);
+  transform: scale(1.1);
+}
+
+.icon-btn:active {
+  transform: scale(1);
+}
+
+.icon-btn-danger {
+  color: var(--text-tertiary);
+}
+
+.icon-btn-danger:hover {
+  color: var(--notion-red-text);
+  background: var(--notion-red-bg);
 }
 
 .flight-card-header h3 {
@@ -1516,6 +1740,9 @@
   font-size: var(--font-xl);
   font-weight: 700;
   color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .flight-price {
@@ -1525,6 +1752,7 @@
   background: var(--notion-green-bg);
   padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-full);
+  white-space: nowrap;
 }
 
 .airline-input {
@@ -1754,11 +1982,25 @@
 /* Flight Interactions (Voting & Comments) */
 .flight-interactions {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: var(--space-sm);
   margin-top: var(--space-lg);
   padding: var(--space-md) 0;
   border-top: 1px solid var(--divider-color);
   border-bottom: 1px solid var(--divider-color);
+}
+
+.flight-interactions-left {
+  display: flex;
+  gap: var(--space-sm);
+  flex: 1;
+}
+
+.flight-interactions-right {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
 }
 
 .vote-button,
@@ -1799,16 +2041,21 @@
   background: var(--surface-secondary);
   padding: var(--space-md);
   border-radius: var(--radius-md);
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .comment-input-container {
   display: flex;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
+  width: 100%;
+  max-width: 100%;
 }
 
 .comment-input-container input {
   flex: 1;
+  min-width: 0; /* Allows input to shrink properly on mobile */
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
@@ -1833,6 +2080,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-base);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .btn-comment:hover {
@@ -1850,6 +2099,8 @@
   padding: var(--space-md);
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--notion-purple-text);
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .comment-header {
@@ -1857,6 +2108,7 @@
   align-items: center;
   gap: var(--space-sm);
   margin-bottom: var(--space-xs);
+  flex-wrap: wrap;
 }
 
 .comment-avatar {
@@ -1899,19 +2151,22 @@
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  overflow: hidden;
 }
 
-.flight-card-actions {
-  display: flex;
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
-  flex-wrap: wrap;
-}
+/* Removed .flight-card-actions - actions now in header as icons */
 
 /* Mobile Responsive Styles for Flight Cards */
 @media (max-width: 768px) {
   .flights-list {
-    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .flight-card {
+    padding: var(--space-md);
   }
 
   .flight-form {
@@ -1954,7 +2209,7 @@
   }
 
   .flight-card {
-    padding: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
   }
 
   .flight-card-header h3 {
@@ -1963,6 +2218,14 @@
 
   .flight-price {
     font-size: var(--font-base);
+  }
+
+  .flight-card-header {
+    gap: var(--space-sm);
+  }
+
+  .flight-card-header-actions {
+    gap: 4px;
   }
 
   .flight-times {
@@ -1995,16 +2258,30 @@
     grid-template-columns: 1fr;
   }
 
-  .flight-card-actions {
-    flex-direction: column;
+  .flight-card-header {
+    gap: var(--space-sm);
   }
 
-  .flight-card-actions button {
-    width: 100%;
+  .flight-card-title-section {
+    gap: 4px;
+  }
+
+  .icon-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .icon-btn svg {
+    width: 14px;
+    height: 14px;
   }
 }
 
 @media (max-width: 480px) {
+  .flights-list {
+    gap: var(--space-sm);
+  }
+
   .flight-form {
     padding: var(--space-md);
   }
@@ -2044,17 +2321,53 @@
   }
 
   .flight-card {
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .flight-card-header h3 {
+    font-size: var(--font-base);
+  }
+
+  .flight-price {
+    font-size: var(--font-sm);
+    padding: 4px var(--space-sm);
+  }
+
+  .btn-comment {
+    padding: var(--space-sm);
+    font-size: 12px;
+  }
+
+  .comment-input-container {
+    gap: 6px;
+  }
+
+  .comment-input-container input {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 12px;
   }
 
   .flight-card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-sm);
+    gap: 6px;
   }
 
-  .time-value {
-    font-size: var(--font-sm);
+  .flight-card-title-section {
+    gap: 2px;
+  }
+
+  .indicator-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .icon-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .icon-btn svg {
+    width: 12px;
+    height: 12px;
   }
 }
 

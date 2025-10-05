@@ -55,23 +55,44 @@ const FlightTab = ({
 
         {activeSubTab === 2 && (
           <div className="flights-list">
-            {flights.map((flight) => (
-              <FlightCard
-                key={flight.id}
-                flight={flight}
-                isEditing={editingId === flight.id}
-                editedFlight={editedFlight}
-                onStartEdit={() => onStartEdit(flight.id)}
-                onSaveEdit={() => onSaveEdit(flight.id)}
-                onCancelEdit={onCancelEdit}
-                onDelete={() => onDeleteFlight(flight.id)}
-                onUpdateField={onUpdateEditedField}
-                onVote={() => onVote(flight.id)}
-                onAddComment={(text) => onAddComment(flight.id, text)}
-                onDeleteComment={(commentId) => onDeleteComment(flight.id, commentId)}
-                currentUser={currentUser}
-              />
-            ))}
+            {(() => {
+              // Group flights by airline
+              const groupedFlights = flights.reduce((acc, flight) => {
+                const airline = flight.airline || '未命名航空';
+                if (!acc[airline]) {
+                  acc[airline] = [];
+                }
+                acc[airline].push(flight);
+                return acc;
+              }, {});
+
+              return Object.entries(groupedFlights).map(([airline, airlineFlights]) => (
+                <div key={airline} className="airline-group">
+                  <div className="airline-group-header">
+                    <h3>{airline}</h3>
+                  </div>
+                  <div className="airline-flights">
+                    {airlineFlights.map((flight) => (
+                      <FlightCard
+                        key={flight.id}
+                        flight={flight}
+                        isEditing={editingId === flight.id}
+                        editedFlight={editedFlight}
+                        onStartEdit={() => onStartEdit(flight.id)}
+                        onSaveEdit={() => onSaveEdit(flight.id)}
+                        onCancelEdit={onCancelEdit}
+                        onDelete={() => onDeleteFlight(flight.id)}
+                        onUpdateField={onUpdateEditedField}
+                        onVote={() => onVote(flight.id)}
+                        onAddComment={(text) => onAddComment(flight.id, text)}
+                        onDeleteComment={(commentId) => onDeleteComment(flight.id, commentId)}
+                        currentUser={currentUser}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ));
+            })()}
           </div>
         )}
       </div>
