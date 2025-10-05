@@ -175,7 +175,7 @@
 }
 
 .tab-btn {
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-lg) var(--space-xl);
   border: none;
   background: transparent;
   cursor: pointer;
@@ -183,9 +183,10 @@
   transition: all var(--transition-base);
   color: var(--text-secondary);
   font-weight: 500;
-  font-size: var(--font-base);
+  font-size: var(--font-lg);
   letter-spacing: -0.01em;
-  min-width: 140px;
+  min-width: 160px;
+  min-height: 48px;
   position: relative;
   border: 1px solid transparent;
   white-space: nowrap;
@@ -203,10 +204,10 @@
 }
 
 .tab-btn.active {
-  background: var(--notion-purple-bg);
-  color: var(--notion-purple-text);
+  background: rgba(215, 108, 130, 0.15);
+  color: var(--color-coral-pink);
   font-weight: 600;
-  border-color: var(--notion-purple-text);
+  border-color: var(--color-coral-pink);
 }
 
 @media (max-width: 640px) {
@@ -403,11 +404,11 @@
 }
 
 .btn {
-  background: var(--notion-blue-bg);
-  color: var(--notion-blue-text);
-  border: none;
+  background: rgba(215, 108, 130, 0.15);
+  color: var(--color-coral-pink);
+  border: 1px solid var(--color-coral-pink);
   padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: var(--font-sm);
   font-weight: 600;
@@ -417,20 +418,42 @@
 }
 
 .btn:hover {
-  background: var(--notion-blue-text);
+  background: var(--color-coral-pink);
   color: white;
+  border-color: var(--color-coral-pink);
 }
 
 .btn:active {
   transform: scale(0.98);
 }
 
+.btn-large {
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--font-base);
+  min-height: 44px;
+}
+
+.btn-icon-only {
+  padding: var(--space-md) var(--space-lg);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-icon-only:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
 .btn-remove {
-  background: var(--notion-red-bg);
-  color: var(--notion-red-text);
-  border: none;
+  background: rgba(229, 152, 155, 0.15);
+  color: var(--color-rose-pink);
+  border: 1px solid var(--color-rose-pink);
   padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
   margin-left: 0;
   font-size: var(--font-sm);
@@ -441,8 +464,9 @@
 }
 
 .btn-remove:hover {
-  background: var(--notion-red-text);
+  background: var(--color-rose-pink);
   color: white;
+  border-color: var(--color-rose-pink);
 }
 
 .btn-remove:active {
@@ -1049,18 +1073,26 @@
 }
 
 .day-accordion.completed {
-  background: var(--notion-green-bg);
-  border-color: var(--notion-green-text);
-  opacity: 0.8;
+  background: var(--surface-secondary);
+  border-color: var(--border-color);
+  opacity: 0.6;
 }
 
 .day-accordion.completed .day-accordion-header {
-  background: var(--notion-green-bg);
+  background: var(--surface-secondary);
 }
 
 .day-accordion.completed h3 {
-  color: var(--notion-green-text);
+  color: var(--text-tertiary);
   text-decoration: line-through;
+}
+
+.day-accordion.completed .location-card {
+  opacity: 0.7;
+}
+
+.day-accordion.completed .day-location-count {
+  color: var(--text-tertiary);
 }
 
 .day-accordion-header {
@@ -1247,18 +1279,37 @@
 }
 
 .tag-transportation {
-  background: var(--notion-purple-bg);
-  color: var(--notion-purple-text);
+  background: rgba(229, 152, 155, 0.2);
+  color: var(--color-rose-pink);
+  border: 1px solid var(--color-rose-pink);
 }
 
 .tag-time {
-  background: var(--notion-pink-bg);
-  color: var(--notion-pink-text);
+  background: rgba(255, 180, 162, 0.2);
+  color: var(--color-peach);
+  border: 1px solid var(--color-peach);
 }
 
 .tag-category {
-  background: var(--notion-orange-bg);
-  color: var(--notion-orange-text);
+  background: rgba(215, 108, 130, 0.2);
+  color: var(--color-coral-pink);
+  border: 1px solid var(--color-coral-pink);
+}
+
+.location-creator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--surface-secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-xs);
+  color: var(--text-tertiary);
+}
+
+.creator-email {
+  font-style: italic;
 }
 
 .location-notes {
@@ -1537,9 +1588,9 @@
 }
 
 .flight-option-card:hover {
-  background: var(--surface-hover);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: var(--text-tertiary);
+  background: rgba(235, 232, 219, 0.4);
+  box-shadow: 0 2px 8px rgba(181, 130, 140, 0.08);
+  border-color: rgba(181, 130, 140, 0.3);
   transform: translateY(-2px);
 }
 
@@ -1643,16 +1694,37 @@
 
 .time-label-compact {
   font-size: var(--font-xs);
-  color: var(--text-secondary);
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .time-value-compact {
   font-size: var(--font-lg);
   font-weight: 700;
-  color: var(--text-primary);
   font-feature-settings: 'tnum';
   letter-spacing: -0.02em;
+}
+
+/* Outbound column - coral pink for all text */
+.flight-time-column.outbound .time-label-compact,
+.flight-time-column.outbound .time-value-compact {
+  color: var(--color-coral-pink) !important;
+}
+
+.flight-time-column.outbound .flight-time-label {
+  background: rgba(215, 108, 130, 0.15) !important;
+  color: var(--color-coral-pink) !important;
+}
+
+/* Return column - peach for all text */
+.flight-time-column.return .time-label-compact,
+.flight-time-column.return .time-value-compact {
+  color: var(--color-peach) !important;
+}
+
+.flight-time-column.return .flight-time-label {
+  background: rgba(255, 180, 162, 0.2) !important;
+  color: var(--color-peach) !important;
 }
 
 /* Old flight card (backup, can be removed later) */

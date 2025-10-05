@@ -1,47 +1,46 @@
 /* CSS Variables - Custom Color Theme */
 :root {
-  /* Custom Color Palette - Based on provided theme */
-  --color-mauve: #88596B;
-  --color-rose-pink: #D493B9;
-  --color-light-pink: #F3AAD5;
-  --color-medium-purple: #AA85CD;
-  --color-light-purple: #D2A7FD;
-  --color-terracotta: #DA896F;
-  --color-peachy-coral: #FF9F81;
+  /* New Custom Color Palette */
+  --color-cream: #EBE8DB;           /* Warm cream - backgrounds */
+  --color-coral-pink: #D76C82;      /* Coral pink - primary accent */
+  --color-peach-light: #FFCDB2;     /* Light peach - soft backgrounds */
+  --color-peach: #FFB4A2;           /* Peach - secondary accent */
+  --color-rose-pink: #E5989B;       /* Rose pink - tags/labels */
+  --color-mauve-gray: #B5828C;      /* Mauve gray - text */
 
-  /* Notion Color Palette - Updated with custom colors */
+  /* Notion Color Palette - Updated with warm palette */
   --notion-default-bg: #FFFFFF;
-  --notion-default-text: #88596B;
-  --notion-gray-bg: #F7F6F3;
-  --notion-gray-text: #88596B;
-  --notion-brown-bg: #F3EEEE;
-  --notion-brown-text: #88596B;
-  --notion-orange-bg: #FFE5DE;
-  --notion-orange-text: #DA896F;
-  --notion-yellow-bg: #FDECC8;
-  --notion-yellow-text: #DA896F;
-  --notion-green-bg: #E8DEEE;
-  --notion-green-text: #AA85CD;
-  --notion-blue-bg: #F3E5F5;
-  --notion-blue-text: #AA85CD;
-  --notion-purple-bg: #F3E5F5;
-  --notion-purple-text: #AA85CD;
-  --notion-pink-bg: #FCE4EC;
-  --notion-pink-text: #D493B9;
-  --notion-red-bg: #FFE5DE;
-  --notion-red-text: #FF9F81;
+  --notion-default-text: #B5828C;
+  --notion-gray-bg: #EBE8DB;
+  --notion-gray-text: #B5828C;
+  --notion-brown-bg: #FFCDB2;
+  --notion-brown-text: #D76C82;
+  --notion-orange-bg: rgba(255, 205, 178, 0.3);
+  --notion-orange-text: #FFB4A2;
+  --notion-yellow-bg: rgba(255, 205, 178, 0.2);
+  --notion-yellow-text: #D76C82;
+  --notion-green-bg: rgba(229, 152, 155, 0.2);
+  --notion-green-text: #E5989B;
+  --notion-blue-bg: rgba(215, 108, 130, 0.15);
+  --notion-blue-text: #D76C82;
+  --notion-purple-bg: rgba(181, 130, 140, 0.15);
+  --notion-purple-text: #B5828C;
+  --notion-pink-bg: rgba(255, 180, 162, 0.2);
+  --notion-pink-text: #E5989B;
+  --notion-red-bg: rgba(215, 108, 130, 0.2);
+  --notion-red-text: #D76C82;
 
   /* Surface Colors */
   --surface-bg: #FFFFFF;
-  --surface-secondary: #FCF9FB;
-  --surface-hover: #F8F3F6;
-  --border-color: rgba(136, 89, 107, 0.12);
-  --divider-color: rgba(136, 89, 107, 0.12);
+  --surface-secondary: #EBE8DB;
+  --surface-hover: rgba(255, 205, 178, 0.3);
+  --border-color: rgba(181, 130, 140, 0.25);
+  --divider-color: rgba(181, 130, 140, 0.25);
 
   /* Text Colors */
-  --text-primary: #88596B;
-  --text-secondary: #AA85CD;
-  --text-tertiary: #D493B9;
+  --text-primary: #B5828C;
+  --text-secondary: #D76C82;
+  --text-tertiary: #E5989B;
 
   /* Spacing Scale (8px grid) */
   --space-xs: 4px;
