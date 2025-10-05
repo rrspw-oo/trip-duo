@@ -35,43 +35,32 @@ const FlightForm = ({ newFlight, setNewFlight, onAddFlight, startDate, endDate }
       <div className="flight-form-section outbound-section">
         <div className="flight-form-header">
           <span className="flight-type-tag outbound">去程</span>
+          <input
+            type="date"
+            value={startDate || ''}
+            disabled
+            placeholder="yyyy/mm/dd"
+            className="synced-date header-date"
+          />
         </div>
         <div className="flight-time-inputs">
           <div className="time-input-group">
             <label>起飛時間</label>
-            <div className="datetime-split">
-              <input
-                type="date"
-                value={startDate || ''}
-                disabled
-                placeholder="yyyy/mm/dd"
-                className="synced-date"
-              />
-              <input
-                type="time"
-                value={getTimePart(newFlight.outboundDeparture)}
-                onChange={handleOutboundDepartureTimeChange}
-                placeholder="--:--"
-              />
-            </div>
+            <input
+              type="time"
+              value={getTimePart(newFlight.outboundDeparture)}
+              onChange={handleOutboundDepartureTimeChange}
+              placeholder="--:--"
+            />
           </div>
           <div className="time-input-group">
             <label>抵達時間</label>
-            <div className="datetime-split">
-              <input
-                type="date"
-                value={startDate || ''}
-                disabled
-                placeholder="yyyy/mm/dd"
-                className="synced-date"
-              />
-              <input
-                type="time"
-                value={getTimePart(newFlight.outboundArrival)}
-                onChange={handleOutboundArrivalTimeChange}
-                placeholder="--:--"
-              />
-            </div>
+            <input
+              type="time"
+              value={getTimePart(newFlight.outboundArrival)}
+              onChange={handleOutboundArrivalTimeChange}
+              placeholder="--:--"
+            />
           </div>
         </div>
         <div className="flight-comment-input">
@@ -91,43 +80,32 @@ const FlightForm = ({ newFlight, setNewFlight, onAddFlight, startDate, endDate }
       <div className="flight-form-section return-section">
         <div className="flight-form-header">
           <span className="flight-type-tag return">回程</span>
+          <input
+            type="date"
+            value={endDate || ''}
+            disabled
+            placeholder="yyyy/mm/dd"
+            className="synced-date header-date"
+          />
         </div>
         <div className="flight-time-inputs">
           <div className="time-input-group">
             <label>起飛時間</label>
-            <div className="datetime-split">
-              <input
-                type="date"
-                value={endDate || ''}
-                disabled
-                placeholder="yyyy/mm/dd"
-                className="synced-date"
-              />
-              <input
-                type="time"
-                value={getTimePart(newFlight.returnDeparture)}
-                onChange={handleReturnDepartureTimeChange}
-                placeholder="--:--"
-              />
-            </div>
+            <input
+              type="time"
+              value={getTimePart(newFlight.returnDeparture)}
+              onChange={handleReturnDepartureTimeChange}
+              placeholder="--:--"
+            />
           </div>
           <div className="time-input-group">
             <label>抵達時間</label>
-            <div className="datetime-split">
-              <input
-                type="date"
-                value={endDate || ''}
-                disabled
-                placeholder="yyyy/mm/dd"
-                className="synced-date"
-              />
-              <input
-                type="time"
-                value={getTimePart(newFlight.returnArrival)}
-                onChange={handleReturnArrivalTimeChange}
-                placeholder="--:--"
-              />
-            </div>
+            <input
+              type="time"
+              value={getTimePart(newFlight.returnArrival)}
+              onChange={handleReturnArrivalTimeChange}
+              placeholder="--:--"
+            />
           </div>
         </div>
         <div className="flight-comment-input">

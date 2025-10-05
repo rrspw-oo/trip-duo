@@ -1417,7 +1417,20 @@
 }
 
 .flight-form-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
   margin-bottom: var(--space-md);
+}
+
+.flight-form-header .header-date {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: var(--font-sm);
+  cursor: default;
+  padding: 0;
 }
 
 .flight-type-tag {
@@ -1671,17 +1684,30 @@
   gap: 4px;
 }
 
+.flight-time-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: 6px;
+}
+
 .flight-time-label {
   font-size: var(--font-sm);
   font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 6px;
   background: var(--surface-secondary);
   padding: 4px var(--space-sm);
   border-radius: var(--radius-md);
   text-align: center;
+}
+
+.flight-date {
+  font-size: var(--font-xs);
+  color: var(--text-tertiary);
+  font-weight: 500;
 }
 
 .time-row {
@@ -2010,6 +2036,11 @@
   line-height: var(--leading-relaxed);
 }
 
+.flight-comment-input textarea::placeholder {
+  color: rgba(181, 130, 140, 0.35);
+  opacity: 1;
+}
+
 .flight-comment-input textarea:hover {
   background: var(--surface-hover);
 }
@@ -2018,6 +2049,19 @@
   outline: none;
   background: var(--surface-bg);
   box-shadow: rgba(46, 170, 220, 0.35) 0px 0px 0px 2px;
+}
+
+/* Responsive font size for textarea */
+@media (max-width: 768px) {
+  .flight-comment-input textarea {
+    font-size: var(--font-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .flight-comment-input textarea {
+    font-size: 11px;
+  }
 }
 
 .flight-comment-input.edit-mode textarea {

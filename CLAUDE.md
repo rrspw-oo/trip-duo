@@ -311,3 +311,38 @@ REACT_APP_FIREBASE_APP_ID=
 3. Hosting deployed: `firebase deploy --only hosting`
 4. Test invite flow on live site
 5. Verify PWA icons show correctly (may need to reinstall PWA)
+
+## Recent Updates (2025-10-05)
+
+### Design System Redesign
+The application received a complete visual overhaul with a new warm, elegant color palette:
+
+**Color Palette**:
+- `#D76C82` (Coral Pink) - Primary accent, outbound flights
+- `#FFB4A2` (Peach) - Secondary accent, return flights
+- `#E5989B` (Rose Pink) - Tags and labels
+- `#B5828C` (Mauve Gray) - Primary text and borders
+- `#EBE8DB` (Cream) - Secondary backgrounds
+- `#FFCDB2` (Light Peach) - Hover states
+
+**Key Changes**:
+- Removed deep rose (`#B03052`) and dark brown (`#3D0301`) from color scheme
+- Softer, more approachable visual design
+- Improved accessibility with better contrast ratios
+
+### Flight Management Updates
+1. **Form Layout**: Date fields moved to header row next to flight type labels
+2. **Time Display**: Simplified to show only time (removed redundant date fields)
+3. **Visual Distinction**: Clear color differentiation between outbound/return
+4. **Form Notes**: Enhanced placeholder readability (35% opacity) with responsive typography
+
+### Daily Planning Enhancements
+1. **Date-based Completion**: Past days automatically marked as completed
+2. **Persistent Days**: Fixed bug where days disappeared after deleting locations
+3. **Creator Attribution**: Shows who added each location with Gmail icon
+4. **Sorting Logic**: Completed/past days move to bottom while remaining viewable
+
+### Technical Notes
+- All CSS updates use the new color variables
+- Responsive font sizing implemented across all form elements
+- Improved hover states with subtle cream backgrounds and soft shadows
