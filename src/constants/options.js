@@ -36,15 +36,40 @@ export const CATEGORY_OPTIONS = [
 
 // Tab configuration
 export const TABS = [
+  { id: 1, label: "行前安排" },
+  { id: 2, label: "每日規劃" },
+];
+
+// Pre-trip sub-tabs
+export const PRETRIP_SUB_TABS = [
   { id: 1, label: "旅行時間" },
   { id: 2, label: "機票確認" },
-  { id: 3, label: "每日規劃" },
+  { id: 3, label: "住宿確認" },
+  { id: 4, label: "行前必備" },
 ];
 
 // Flight sub-tabs
 export const FLIGHT_SUB_TABS = [
   { id: 1, label: "新增航班" },
   { id: 2, label: "航班列表" },
+  { id: 3, label: "確認航班" },
+];
+
+// Accommodation sub-tabs
+export const ACCOMMODATION_SUB_TABS = [
+  { id: 1, label: "新增住宿" },
+  { id: 2, label: "住宿列表" },
+  { id: 3, label: "確認住宿" },
+];
+
+// Amenities options for accommodations
+export const AMENITIES_OPTIONS = [
+  "吹風機",
+  "毛巾",
+  "洗衣機",
+  "烘衣機",
+  "熱水壺",
+  "其他"
 ];
 
 // Airline color mapping for visual distinction (subtle grays and beiges)

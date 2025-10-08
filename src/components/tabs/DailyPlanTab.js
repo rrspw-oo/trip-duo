@@ -27,18 +27,10 @@ const DailyPlanTab = ({
     return dayDate < today;
   };
 
-  // Sort days: incomplete and future first, then completed/past (both in numerical order)
+  // Sort days: always in numerical order (don't move completed to bottom)
   const sortedDays = allDays.sort((a, b) => {
     const numA = parseInt(a.replace("Day ", ""));
     const numB = parseInt(b.replace("Day ", ""));
-
-    const isCompletedA = skippedDays[a] || isDayPast(a);
-    const isCompletedB = skippedDays[b] || isDayPast(b);
-
-    if (isCompletedA !== isCompletedB) {
-      return isCompletedA ? 1 : -1;
-    }
-
     return numA - numB;
   });
 
@@ -54,7 +46,7 @@ const DailyPlanTab = ({
             day={day}
             dayPlan={dailyPlans[day] || { locations: {} }}
             isExpanded={expandedDays[day]}
-            isCompleted={skippedDays[day] || isDayPast(day)}
+            isCompleted={skippedDays[day] !== undefined ? skippedDays[day] : isDayPast(day)}
             onToggleExpanded={onToggleDayExpanded}
             onToggleCompleted={onToggleDayCompleted}
             onAddLocation={onAddLocation}

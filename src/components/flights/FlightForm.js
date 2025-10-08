@@ -2,9 +2,29 @@ import React from "react";
 import CustomDropdown from "../common/CustomDropdown";
 import { AIRLINE_OPTIONS } from "../../constants/options";
 
-const FlightForm = ({ newFlight, setNewFlight, onAddFlight, startDate, endDate }) => {
+const FlightForm = ({ newFlight, setNewFlight, onAddFlight, onAddSuccess, startDate, endDate }) => {
   // Helper function to extract time from datetime string
   const getTimePart = (datetime) => datetime ? datetime.split('T')[1] || '' : '';
+
+  const handleAddFlight = () => {
+    // Call the add function
+    onAddFlight();
+
+    // Check if all required fields are filled to determine success
+    if (
+      newFlight.airline &&
+      newFlight.outboundDeparture &&
+      newFlight.outboundArrival &&
+      newFlight.returnDeparture &&
+      newFlight.returnArrival &&
+      newFlight.price
+    ) {
+      // If successful, call the success callback
+      if (onAddSuccess) {
+        onAddSuccess();
+      }
+    }
+  };
 
   const handleOutboundDepartureTimeChange = (e) => {
     const newTime = e.target.value;
@@ -137,7 +157,7 @@ const FlightForm = ({ newFlight, setNewFlight, onAddFlight, startDate, endDate }
           }
           maxLength="20"
         />
-        <button onClick={onAddFlight} className="btn">
+        <button onClick={handleAddFlight} className="btn">
           新增航班
         </button>
       </div>

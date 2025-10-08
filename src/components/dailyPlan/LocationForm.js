@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import CustomDropdown from "../common/CustomDropdown";
+import TagSelector from "../common/TagSelector";
 import { TRANSPORTATION_OPTIONS, TIME_PERIOD_OPTIONS, CATEGORY_OPTIONS } from "../../constants/options";
 
 const LocationForm = ({ day, onAddLocation }) => {
   const [locationName, setLocationName] = useState("");
+  const [address, setAddress] = useState("");
   const [transportation, setTransportation] = useState("");
   const [timePeriod, setTimePeriod] = useState("");
   const [category, setCategory] = useState("");
@@ -14,12 +15,14 @@ const LocationForm = ({ day, onAddLocation }) => {
       onAddLocation(day, {
         id: Date.now(),
         name: locationName,
+        address,
         transportation,
         timePeriod,
         category,
         notes,
       });
       setLocationName("");
+      setAddress("");
       setTransportation("");
       setTimePeriod("");
       setCategory("");
@@ -39,24 +42,41 @@ const LocationForm = ({ day, onAddLocation }) => {
           maxLength="100"
         />
       </div>
-      <div className="form-row form-row-three">
-        <CustomDropdown
+      <div className="form-row">
+        <input
+          type="text"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="地址 (選填)"
+          className="location-input"
+          maxLength="200"
+        />
+      </div>
+      <div className="form-row">
+        <TagSelector
           value={transportation}
           onChange={setTransportation}
           options={TRANSPORTATION_OPTIONS}
-          placeholder="交通路線"
+          placeholder="請選擇交通方式"
+          label="交通路線"
         />
-        <CustomDropdown
+      </div>
+      <div className="form-row">
+        <TagSelector
           value={timePeriod}
           onChange={setTimePeriod}
           options={TIME_PERIOD_OPTIONS}
-          placeholder="時段"
+          placeholder="請選擇時段"
+          label="時段"
         />
-        <CustomDropdown
+      </div>
+      <div className="form-row">
+        <TagSelector
           value={category}
           onChange={setCategory}
           options={CATEGORY_OPTIONS}
-          placeholder="分類"
+          placeholder="請選擇分類"
+          label="分類"
         />
       </div>
       <div className="form-row">

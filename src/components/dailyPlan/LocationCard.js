@@ -2,6 +2,13 @@ import React from "react";
 import DOMPurify from "dompurify";
 
 const LocationCard = ({ location, day, index, onRemove }) => {
+  const handleAddressClick = () => {
+    if (location.address) {
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.address)}`;
+      window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className="location-card">
       <div className="location-card-header">
@@ -13,6 +20,14 @@ const LocationCard = ({ location, day, index, onRemove }) => {
           ✕
         </button>
       </div>
+      {location.address && (
+        <div className="location-address" onClick={handleAddressClick}>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" className="location-icon">
+            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+          </svg>
+          <span className="address-text">{location.address}</span>
+        </div>
+      )}
       <div className="location-tags">
         <span className="tag tag-transportation">{location.transportation}</span>
         <span className="tag tag-time">{location.timePeriod}</span>

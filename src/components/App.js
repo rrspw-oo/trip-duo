@@ -29,8 +29,7 @@ import { getUserInitials, getAvatarColor } from "../utils/firebaseHelpers";
 import CustomDropdown from "./common/CustomDropdown";
 
 // Import Tab components
-import TravelTimeTab from "./tabs/TravelTimeTab";
-import FlightTab from "./tabs/FlightTab";
+import PreTripTab from "./tabs/PreTripTab";
 import DailyPlanTab from "./tabs/DailyPlanTab";
 
 function App() {
@@ -83,6 +82,38 @@ function App() {
 
   const [editingId, setEditingId] = useState(null);
   const [editedFlight, setEditedFlight] = useState({});
+
+  // Flight confirmation
+  const [selectedFlightId, setSelectedFlightId] = useState(null);
+  const [confirmedFlight, setConfirmedFlight] = useState(null);
+
+  // Accommodation state
+  const [accommodations, setAccommodations] = useState([]);
+  const [newAccommodation, setNewAccommodation] = useState({
+    name: "",
+    checkIn: "",
+    checkOut: "",
+    price: "",
+    address: "",
+    nearbyStation: "",
+    amenities: [],
+    notes: "",
+    comments: [],
+    votes: {},
+  });
+  const [editingAccommodationId, setEditingAccommodationId] = useState(null);
+  const [editedAccommodation, setEditedAccommodation] = useState({});
+  const [selectedAccommodationId, setSelectedAccommodationId] = useState(null);
+  const [confirmedAccommodation, setConfirmedAccommodation] = useState(null);
+
+  // Pre-trip items state
+  const [preTripItems, setPreTripItems] = useState({});
+  const [newPreTripItem, setNewPreTripItem] = useState({
+    itemName: "",
+    isShared: false,
+  });
+  const [planUsers, setPlanUsers] = useState([]);
+  const [userMetadata, setUserMetadata] = useState({}); // Store user email and displayName
 
   // Check if user has a plan when they log in
   useEffect(() => {
@@ -179,6 +210,42 @@ function App() {
             id,
           }))
         );
+        setSelectedFlightId(data.selectedFlightId || null);
+        setConfirmedFlight(data.confirmedFlight || null);
+        setAccommodations(
+          Object.entries(data.accommodations || {}).map(([id, accommodation]) => ({
+            ...accommodation,
+            id,
+          }))
+        );
+        setSelectedAccommodationId(data.selectedAccommodationId || null);
+        setConfirmedAccommodation(data.confirmedAccommodation || null);
+        setPreTripItems(data.preTripItems || {});
+        setPlanUsers(Object.keys(data.users || {}));
+        setUserMetadata(data.userMetadata || {}); // Load user metadata
+
+        // Auto-migration: Add missing userMetadata for current user
+        const existingMetadata = data.userMetadata || {};
+        const planUsers = data.users || {};
+        let needsUpdate = false;
+        const updatedMetadata = { ...existingMetadata };
+
+        // Check if current user's metadata is missing
+        if (user && planUsers[user.uid] && !existingMetadata[user.uid]) {
+          updatedMetadata[user.uid] = {
+            email: user.email,
+            displayName: user.displayName || user.email,
+          };
+          needsUpdate = true;
+        }
+
+        // Update Firebase if metadata was added
+        if (needsUpdate) {
+          update(ref(database, `travelPlans/${planId}`), {
+            userMetadata: updatedMetadata
+          });
+        }
+
         setTimeout(() => { isUpdatingFromFirebase.current = false; }, 0);
       }
     });
@@ -275,6 +342,48 @@ function App() {
     setEditedFlight({ ...editedFlight, [field]: value });
   };
 
+  // Flight confirmation functions
+  const selectFlight = (flightId) => {
+    setSelectedFlightId(flightId);
+  };
+
+  const confirmSelectedFlight = (flightId = selectedFlightId) => {
+    if (!planId || !flightId) return;
+
+    const flight = flights.find((f) => f.id === flightId);
+    if (!flight) return;
+
+    const newConfirmedFlight = {
+      ...flight,
+      purchaseDate: "",
+      bookingCode: "",
+      isPaid: false,
+    };
+
+    update(ref(database, `travelPlans/${planId}`), {
+      confirmedFlight: newConfirmedFlight,
+      selectedFlightId: flightId,
+    });
+  };
+
+  const clearConfirmedFlight = () => {
+    if (!planId) return;
+
+    update(ref(database, `travelPlans/${planId}`), {
+      confirmedFlight: null,
+      selectedFlightId: null,
+    });
+  };
+
+  const updateConfirmedFlight = (field, value) => {
+    if (!planId || !confirmedFlight) return;
+
+    const updatedFlight = { ...confirmedFlight, [field]: value };
+
+    setConfirmedFlight(updatedFlight);
+    update(ref(database, `travelPlans/${planId}/confirmedFlight`), updatedFlight);
+  };
+
   // Flight voting and comments
   const handleVote = (flightId) => {
     if (!planId || !user) return;
@@ -328,7 +437,226 @@ function App() {
     });
   };
 
-  // Tab 3: Daily plans with locations
+  // Accommodation functions
+  const addAccommodation = () => {
+    if (
+      !newAccommodation.name ||
+      !newAccommodation.checkIn ||
+      !newAccommodation.checkOut ||
+      !newAccommodation.price
+    )
+      return;
+
+    if (!planId) return;
+
+    const accommodationRef = ref(database, `travelPlans/${planId}/accommodations`);
+    const newAccommodationKey = push(accommodationRef).key;
+    const newAccommodationData = { ...newAccommodation, id: newAccommodationKey };
+    set(
+      ref(database, `travelPlans/${planId}/accommodations/${newAccommodationKey}`),
+      newAccommodationData
+    );
+    setNewAccommodation({
+      name: "",
+      checkIn: "",
+      checkOut: "",
+      price: "",
+      address: "",
+      nearbyStation: "",
+      amenities: [],
+      notes: "",
+      comments: [],
+      votes: {},
+    });
+  };
+
+  const deleteAccommodation = (id) => {
+    if (!planId) return;
+    remove(ref(database, `travelPlans/${planId}/accommodations/${id}`));
+    if (editingAccommodationId === id) {
+      setEditingAccommodationId(null);
+    }
+  };
+
+  const startEditingAccommodation = (id) => {
+    setEditingAccommodationId(id);
+    const accommodation = accommodations.find((a) => a.id === id);
+    setEditedAccommodation({ ...accommodation });
+  };
+
+  const saveAccommodationEdit = (id) => {
+    if (!planId) return;
+    update(ref(database, `travelPlans/${planId}/accommodations/${id}`), editedAccommodation);
+    setEditingAccommodationId(null);
+    setEditedAccommodation({});
+  };
+
+  const cancelAccommodationEdit = () => {
+    setEditingAccommodationId(null);
+    setEditedAccommodation({});
+  };
+
+  const updateEditedAccommodation = (field, value) => {
+    setEditedAccommodation({ ...editedAccommodation, [field]: value });
+  };
+
+  // Accommodation confirmation functions
+  const selectAccommodation = (accommodationId) => {
+    setSelectedAccommodationId(accommodationId);
+  };
+
+  const confirmSelectedAccommodation = (accommodationId = selectedAccommodationId) => {
+    if (!planId || !accommodationId) return;
+
+    const accommodation = accommodations.find((a) => a.id === accommodationId);
+    if (!accommodation) return;
+
+    const newConfirmedAccommodation = {
+      ...accommodation,
+      bookingDate: "",
+      bookingCode: "",
+      isPaid: false,
+    };
+
+    update(ref(database, `travelPlans/${planId}`), {
+      confirmedAccommodation: newConfirmedAccommodation,
+      selectedAccommodationId: accommodationId,
+    });
+  };
+
+  const clearConfirmedAccommodation = () => {
+    if (!planId) return;
+
+    update(ref(database, `travelPlans/${planId}`), {
+      confirmedAccommodation: null,
+      selectedAccommodationId: null,
+    });
+  };
+
+  const updateConfirmedAccommodation = (field, value) => {
+    if (!planId || !confirmedAccommodation) return;
+
+    const updatedAccommodation = { ...confirmedAccommodation, [field]: value };
+
+    setConfirmedAccommodation(updatedAccommodation);
+    update(ref(database, `travelPlans/${planId}/confirmedAccommodation`), updatedAccommodation);
+  };
+
+  // Accommodation voting and comments
+  const handleAccommodationVote = (accommodationId) => {
+    if (!planId || !user) return;
+
+    const accommodation = accommodations.find((a) => a.id === accommodationId);
+    const votes = accommodation?.votes || {};
+    const hasVoted = votes[user.uid];
+
+    const updatedVotes = { ...votes };
+    if (hasVoted) {
+      delete updatedVotes[user.uid];
+    } else {
+      updatedVotes[user.uid] = true;
+    }
+
+    update(ref(database, `travelPlans/${planId}/accommodations/${accommodationId}`), {
+      votes: updatedVotes,
+    });
+  };
+
+  const addAccommodationComment = (accommodationId, commentText) => {
+    if (!planId || !user || !commentText.trim()) return;
+
+    const accommodation = accommodations.find((a) => a.id === accommodationId);
+    const comments = accommodation?.comments || [];
+
+    const newComment = {
+      id: Date.now().toString(),
+      author: {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || "Anonymous",
+        photoURL: user.photoURL,
+      },
+      text: commentText,
+      timestamp: Date.now(),
+    };
+
+    update(ref(database, `travelPlans/${planId}/accommodations/${accommodationId}`), {
+      comments: [...comments, newComment],
+    });
+  };
+
+  const deleteAccommodationComment = (accommodationId, commentId) => {
+    if (!planId || !user) return;
+
+    const accommodation = accommodations.find((a) => a.id === accommodationId);
+    const comments = accommodation?.comments || [];
+
+    const updatedComments = comments.filter((c) => !(c.id === commentId && c.author.uid === user.uid));
+
+    update(ref(database, `travelPlans/${planId}/accommodations/${accommodationId}`), {
+      comments: updatedComments,
+    });
+  };
+
+  // Pre-trip items functions
+  const addPreTripItem = () => {
+    if (!planId || !user) return;
+
+    const itemId = Date.now().toString();
+    const planUsersRef = ref(database, `travelPlans/${planId}/users`);
+
+    get(planUsersRef).then((snapshot) => {
+      const users = snapshot.val() || {};
+      const allUserIds = Object.keys(users);
+
+      const itemData = {
+        itemName: newPreTripItem.itemName.trim(),
+        addedBy: user.uid,
+        isShared: newPreTripItem.isShared,
+        checkedBy: [],
+        timestamp: Date.now(),
+      };
+
+      set(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`), itemData);
+
+      setNewPreTripItem({
+        itemName: "",
+        isShared: false,
+      });
+    });
+  };
+
+  const toggleItemCheck = (itemId, userId) => {
+    if (!planId) return;
+
+    const item = preTripItems[itemId];
+    if (!item) return;
+
+    const checkedBy = item.checkedBy || [];
+    const isCurrentlyChecked = checkedBy.includes(userId);
+
+    const updatedCheckedBy = isCurrentlyChecked
+      ? checkedBy.filter(uid => uid !== userId)
+      : [...checkedBy, userId];
+
+    update(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`), {
+      checkedBy: updatedCheckedBy,
+    });
+  };
+
+  const deletePreTripItem = (itemId) => {
+    if (!planId || !user) return;
+
+    const item = preTripItems[itemId];
+    if (!item || item.addedBy !== user.uid) {
+      alert('只有物品建立者可以刪除此物品');
+      return;
+    }
+
+    remove(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`));
+  };
+
+  // Daily plans with locations
   const [dailyPlans, setDailyPlans] = useState({});
   const [expandedDays, setExpandedDays] = useState({});
   const [skippedDays, setSkippedDays] = useState({});
@@ -445,6 +773,12 @@ function App() {
     const initialData = {
       ownerUid: user.uid,
       users: { [user.uid]: true },
+      userMetadata: {
+        [user.uid]: {
+          email: user.email,
+          displayName: user.displayName || user.email,
+        }
+      },
       startDate: "",
       endDate: "",
       totalDays: 0,
@@ -529,9 +863,19 @@ function App() {
       // Step 4: Join the plan
       console.log("Step 4: Joining plan...");
       const updatedUsers = { ...currentUsers, [user.uid]: true };
+      const updatedUserMetadata = {
+        ...(plan.userMetadata || {}),
+        [user.uid]: {
+          email: user.email,
+          displayName: user.displayName || user.email,
+        }
+      };
       console.log("Updated users:", updatedUsers);
-      await update(planRef, { users: updatedUsers });
-      console.log("Plan users updated");
+      await update(planRef, {
+        users: updatedUsers,
+        userMetadata: updatedUserMetadata
+      });
+      console.log("Plan users and metadata updated");
 
       await set(ref(database, `users/${user.uid}`), {
         planId: invite.planId,
@@ -642,8 +986,18 @@ function App() {
       // Step 4: Join the plan
       console.log("Step 4: Joining plan...");
       const updatedUsers = { ...currentUsers, [user.uid]: true };
-      await update(planRef, { users: updatedUsers });
-      console.log("Plan users updated");
+      const updatedUserMetadata = {
+        ...(plan.userMetadata || {}),
+        [user.uid]: {
+          email: user.email,
+          displayName: user.displayName || user.email,
+        }
+      };
+      await update(planRef, {
+        users: updatedUsers,
+        userMetadata: updatedUserMetadata
+      });
+      console.log("Plan users and metadata updated");
 
       await set(ref(database, `users/${user.uid}`), {
         planId: invite.planId,
@@ -1220,38 +1574,66 @@ function App() {
     switch (currentTab) {
       case 1:
         return (
-          <TravelTimeTab
+          <PreTripTab
+            planId={planId}
             startDate={startDate}
             endDate={endDate}
             totalDays={totalDays}
             setStartDate={setStartDate}
             setEndDate={setEndDate}
             onCalculateDays={calculateDays}
-          />
-        );
-      case 2:
-        return (
-          <FlightTab
             flights={flights}
             newFlight={newFlight}
             setNewFlight={setNewFlight}
-            editingId={editingId}
+            editingFlightId={editingId}
             editedFlight={editedFlight}
             onAddFlight={addFlight}
-            onStartEdit={startEdit}
-            onSaveEdit={saveEdit}
-            onCancelEdit={cancelEdit}
+            onStartEditFlight={startEdit}
+            onSaveEditFlight={saveEdit}
+            onCancelEditFlight={cancelEdit}
             onDeleteFlight={deleteFlight}
-            onUpdateEditedField={updateEditedFlight}
-            onVote={handleVote}
-            onAddComment={addComment}
-            onDeleteComment={deleteComment}
+            onUpdateEditedFlightField={updateEditedFlight}
+            onFlightVote={handleVote}
+            onAddFlightComment={addComment}
+            onDeleteFlightComment={deleteComment}
             currentUser={user}
-            startDate={startDate}
-            endDate={endDate}
+            selectedFlightId={selectedFlightId}
+            onSelectFlight={selectFlight}
+            onConfirmFlight={confirmSelectedFlight}
+            confirmedFlight={confirmedFlight}
+            onUpdateConfirmedFlight={updateConfirmedFlight}
+            onClearConfirmedFlight={clearConfirmedFlight}
+            accommodations={accommodations}
+            newAccommodation={newAccommodation}
+            setNewAccommodation={setNewAccommodation}
+            editingAccommodationId={editingAccommodationId}
+            editedAccommodation={editedAccommodation}
+            onAddAccommodation={addAccommodation}
+            onStartEditAccommodation={startEditingAccommodation}
+            onSaveEditAccommodation={saveAccommodationEdit}
+            onCancelEditAccommodation={cancelAccommodationEdit}
+            onDeleteAccommodation={deleteAccommodation}
+            onUpdateEditedAccommodationField={updateEditedAccommodation}
+            onAccommodationVote={handleAccommodationVote}
+            onAddAccommodationComment={addAccommodationComment}
+            onDeleteAccommodationComment={deleteAccommodationComment}
+            selectedAccommodationId={selectedAccommodationId}
+            onSelectAccommodation={selectAccommodation}
+            onConfirmAccommodation={confirmSelectedAccommodation}
+            confirmedAccommodation={confirmedAccommodation}
+            onUpdateConfirmedAccommodation={updateConfirmedAccommodation}
+            onClearConfirmedAccommodation={clearConfirmedAccommodation}
+            preTripItems={preTripItems}
+            newPreTripItem={newPreTripItem}
+            setNewPreTripItem={setNewPreTripItem}
+            onAddPreTripItem={addPreTripItem}
+            onToggleItemCheck={toggleItemCheck}
+            onDeletePreTripItem={deletePreTripItem}
+            allUsers={planUsers}
+            userMetadata={userMetadata}
           />
         );
-      case 3:
+      case 2:
         return (
           <DailyPlanTab
             totalDays={totalDays}
@@ -1267,13 +1649,61 @@ function App() {
         );
       default:
         return (
-          <TravelTimeTab
+          <PreTripTab
+            planId={planId}
             startDate={startDate}
             endDate={endDate}
-            totalDays={totalDays}
             setStartDate={setStartDate}
             setEndDate={setEndDate}
-            onCalculateDays={calculateDays}
+            flights={flights}
+            newFlight={newFlight}
+            setNewFlight={setNewFlight}
+            editingFlightId={editingId}
+            editedFlight={editedFlight}
+            onAddFlight={addFlight}
+            onStartEditFlight={startEdit}
+            onSaveEditFlight={saveEdit}
+            onCancelEditFlight={cancelEdit}
+            onDeleteFlight={deleteFlight}
+            onUpdateEditedFlightField={updateEditedFlight}
+            onFlightVote={handleVote}
+            onAddFlightComment={addComment}
+            onDeleteFlightComment={deleteComment}
+            currentUser={user}
+            selectedFlightId={selectedFlightId}
+            onSelectFlight={selectFlight}
+            onConfirmFlight={confirmSelectedFlight}
+            confirmedFlight={confirmedFlight}
+            onUpdateConfirmedFlight={updateConfirmedFlight}
+            onClearConfirmedFlight={clearConfirmedFlight}
+            accommodations={accommodations}
+            newAccommodation={newAccommodation}
+            setNewAccommodation={setNewAccommodation}
+            editingAccommodationId={editingAccommodationId}
+            editedAccommodation={editedAccommodation}
+            onAddAccommodation={addAccommodation}
+            onStartEditAccommodation={startEditingAccommodation}
+            onSaveEditAccommodation={saveAccommodationEdit}
+            onCancelEditAccommodation={cancelAccommodationEdit}
+            onDeleteAccommodation={deleteAccommodation}
+            onUpdateEditedAccommodationField={updateEditedAccommodation}
+            onAccommodationVote={handleAccommodationVote}
+            onAddAccommodationComment={addAccommodationComment}
+            onDeleteAccommodationComment={deleteAccommodationComment}
+            selectedAccommodationId={selectedAccommodationId}
+            onSelectAccommodation={selectAccommodation}
+            onConfirmAccommodation={confirmSelectedAccommodation}
+            confirmedAccommodation={confirmedAccommodation}
+            onUpdateConfirmedAccommodation={updateConfirmedAccommodation}
+            onClearConfirmedAccommodation={clearConfirmedAccommodation}
+            preTripItems={preTripItems}
+            newPreTripItem={newPreTripItem}
+            setNewPreTripItem={setNewPreTripItem}
+            onAddPreTripItem={addPreTripItem}
+            onToggleItemCheck={toggleItemCheck}
+            onDeletePreTripItem={deletePreTripItem}
+            allUsers={planUsers}
+            userMetadata={userMetadata}
           />
         );
     }
