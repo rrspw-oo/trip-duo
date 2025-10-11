@@ -1,6 +1,34 @@
 # Changelog
 
-## [Unreleased] - 2025-10-06
+## [Unreleased] - 2025-10-11
+
+### Security Enhancement: Plan Overwrite Protection
+
+#### Added
+- **Plan Overwrite Protection**: Critical safety mechanism to prevent accidental plan deletion
+  - Checks for existing plan before creation in `handleCreatePlan()`
+  - Shows confirmation dialog when user has existing plan:
+    - "您已經有一個旅行計劃。創建新計劃將覆蓋現有計劃。確定要繼續嗎？"
+  - User options:
+    - Cancel → Redirects to existing plan (preserves data)
+    - Confirm → Proceeds with new plan creation (overwrites data)
+
+#### Why This Matters
+- **Context**: Users with existing plans already have auto-redirect on login (via useEffect in App.js)
+- **Edge Case Protection**: Firebase sync delays could expose PlanSelection screen
+- **Data Loss Prevention**: Without protection, clicking "Create New Plan" would silently overwrite all existing travel data
+- **User Safety**: Confirmation dialog adds critical safety layer for user data protection
+
+#### Technical Implementation
+- Location: `src/components/App.js` - `handleCreatePlan()` function (lines 818-863)
+- Method: Async Firebase check before plan creation
+- Firebase Query: `get(ref(database, 'users/${user.uid}'))` to check for existing planId
+- Dialog: Native `window.confirm()` with clear Chinese message
+- Fallback: Automatically redirect to existing plan if user cancels
+
+---
+
+## [Previous Updates] - 2025-10-06
 
 ### Major Restructuring: Pre-Trip Planning & Accommodation Management
 

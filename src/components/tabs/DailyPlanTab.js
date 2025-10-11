@@ -1,7 +1,10 @@
-import React from "react";
-import DayAccordion from "../dailyPlan/DayAccordion";
+import React, { useState } from "react";
+import DailyItineraryTab from "./DailyItineraryTab";
+import ShoppingListTab from "../shoppingList/ShoppingListTab";
+import { DAILY_PLAN_SUB_TABS } from "../../constants/options";
 
 const DailyPlanTab = ({
+  // Daily itinerary props
   totalDays,
   dailyPlans,
   skippedDays,
@@ -10,52 +13,66 @@ const DailyPlanTab = ({
   onToggleDayCompleted,
   onAddLocation,
   onRemoveLocation,
-  startDate
+  startDate,
+
+  // Shopping list props
+  shoppingListItems,
+  newShoppingItem,
+  setNewShoppingItem,
+  onAddShoppingItem,
+  onToggleShoppingItemCheck,
+  onDeleteShoppingItem,
+  currentUser,
+  userMetadata
 }) => {
-  // Generate all days based on totalDays
-  const allDays = Array.from({ length: totalDays }, (_, i) => `Day ${i + 1}`);
-
-  // Helper function to check if a day is in the past
-  const isDayPast = (dayString) => {
-    if (!startDate) return false;
-    const dayNum = parseInt(dayString.replace("Day ", ""));
-    const dayDate = new Date(startDate);
-    dayDate.setDate(dayDate.getDate() + dayNum - 1);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    dayDate.setHours(0, 0, 0, 0);
-    return dayDate < today;
-  };
-
-  // Sort days: always in numerical order (don't move completed to bottom)
-  const sortedDays = allDays.sort((a, b) => {
-    const numA = parseInt(a.replace("Day ", ""));
-    const numB = parseInt(b.replace("Day ", ""));
-    return numA - numB;
-  });
-
-  const visibleDays = sortedDays;
+  const [activeDailyPlanSubTab, setActiveDailyPlanSubTab] = useState(1);
 
   return (
-    <div className="tab-content">
+    <div className="tab-content pre-trip-tab-content">
       <h2>每日規劃</h2>
-      {totalDays > 0 ? (
-        visibleDays.map((day) => (
-          <DayAccordion
-            key={day}
-            day={day}
-            dayPlan={dailyPlans[day] || { locations: {} }}
-            isExpanded={expandedDays[day]}
-            isCompleted={skippedDays[day] !== undefined ? skippedDays[day] : isDayPast(day)}
-            onToggleExpanded={onToggleDayExpanded}
-            onToggleCompleted={onToggleDayCompleted}
+
+      {/* Daily plan sub-tabs navigation */}
+      <div className="pre-trip-sub-tabs">
+        {DAILY_PLAN_SUB_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            className={`pre-trip-sub-tab ${activeDailyPlanSubTab === tab.id ? "active" : ""}`}
+            onClick={() => setActiveDailyPlanSubTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Daily plan sub-tab content */}
+      <div className="pre-trip-sub-tab-content">
+        {activeDailyPlanSubTab === 1 && (
+          <DailyItineraryTab
+            totalDays={totalDays}
+            dailyPlans={dailyPlans}
+            skippedDays={skippedDays}
+            expandedDays={expandedDays}
+            onToggleDayExpanded={onToggleDayExpanded}
+            onToggleDayCompleted={onToggleDayCompleted}
             onAddLocation={onAddLocation}
             onRemoveLocation={onRemoveLocation}
+            startDate={startDate}
           />
-        ))
-      ) : (
-        <p>請先設定旅行時間以生成每日規劃</p>
-      )}
+        )}
+
+        {activeDailyPlanSubTab === 2 && (
+          <ShoppingListTab
+            shoppingListItems={shoppingListItems}
+            newShoppingItem={newShoppingItem}
+            setNewShoppingItem={setNewShoppingItem}
+            onAddShoppingItem={onAddShoppingItem}
+            onToggleItemCheck={onToggleShoppingItemCheck}
+            onDeleteShoppingItem={onDeleteShoppingItem}
+            currentUser={currentUser}
+            userMetadata={userMetadata}
+          />
+        )}
+      </div>
     </div>
   );
 };

@@ -13,7 +13,7 @@ const PreTripItemsTab = ({
   currentUser,
   userMetadata
 }) => {
-  const [showForm, setShowForm] = useState(true);
+  const [showForm] = useState(true);
 
   // Get list of existing item names for duplicate checking
   const existingItemNames = Object.values(preTripItems).map(item => item.itemName);
@@ -29,7 +29,6 @@ const PreTripItemsTab = ({
 
   const handleAddItem = () => {
     onAddPreTripItem();
-    setShowForm(false);
   };
 
   return (

@@ -1140,6 +1140,8 @@
   padding: var(--space-xs);
 }
 
+/* day-complete-checkbox styles moved to noguchi-senda-theme.css for consistency */
+/*
 .day-complete-checkbox {
   width: 24px;
   height: 24px;
@@ -1148,6 +1150,7 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
+*/
 
 .day-accordion-content {
   padding: var(--space-xl);
@@ -4251,6 +4254,8 @@
   flex: 1;
 }
 
+/* Checkbox styles moved to noguchi-senda-theme.css for better consistency and clear borders */
+/*
 .shared-checklist input[type="checkbox"],
 .personal-checklist input[type="checkbox"],
 .round-checkbox {
@@ -4298,6 +4303,7 @@
   background: var(--color-coral-pink);
   border-color: var(--color-coral-pink);
 }
+*/
 
 .other-user-status {
   display: flex;

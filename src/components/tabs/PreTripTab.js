@@ -83,7 +83,8 @@ const PreTripTab = ({
             className={`pre-trip-sub-tab ${activePreTripSubTab === tab.id ? "active" : ""}`}
             onClick={() => setActivePreTripSubTab(tab.id)}
           >
-            {tab.label}
+            <span className="desktop-label">{tab.label}</span>
+            <span className="mobile-label">{tab.mobileLabel}</span>
           </button>
         ))}
       </div>

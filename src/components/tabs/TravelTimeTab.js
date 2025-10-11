@@ -19,7 +19,7 @@ const TravelTimeTab = ({
   }, [startDate, endDate, totalDays]);
 
   return (
-    <div className="tab-content">
+    <>
       <h2>旅行時間</h2>
       <div className="form-group">
         <label>開始日期:</label>
@@ -49,7 +49,7 @@ const TravelTimeTab = ({
         計算天數
       </button>
       {totalDays > 0 && <p className="result">總共 {totalDays} 天</p>}
-    </div>
+    </>
   );
 };
 

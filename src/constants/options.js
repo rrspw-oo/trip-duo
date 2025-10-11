@@ -42,10 +42,16 @@ export const TABS = [
 
 // Pre-trip sub-tabs
 export const PRETRIP_SUB_TABS = [
-  { id: 1, label: "旅行時間" },
-  { id: 2, label: "機票確認" },
-  { id: 3, label: "住宿確認" },
-  { id: 4, label: "行前必備" },
+  { id: 1, label: "旅行時間", mobileLabel: "天數" },
+  { id: 2, label: "機票確認", mobileLabel: "機票" },
+  { id: 3, label: "住宿確認", mobileLabel: "住宿" },
+  { id: 4, label: "行前必備", mobileLabel: "行前" },
+];
+
+// Daily plan sub-tabs
+export const DAILY_PLAN_SUB_TABS = [
+  { id: 1, label: "每日計劃" },
+  { id: 2, label: "想買清單" },
 ];
 
 // Flight sub-tabs

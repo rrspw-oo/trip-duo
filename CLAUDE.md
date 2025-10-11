@@ -194,6 +194,7 @@ users/
 3. **Secure Invite Codes**: Generated using `crypto.getRandomValues()` (4 bytes → 6 chars)
 4. **Invite Expiration**: 24-hour automatic expiration enforced in security rules
 5. **Temporary Auth**: `inviteAuth` mechanism grants read access during join process
+6. **Plan Overwrite Protection**: Prevents accidental plan deletion with confirmation dialog before creating new plan
 
 ### Join Plan Flow (Important!)
 
@@ -206,6 +207,21 @@ When a user joins via invite code:
 5. Clean up: delete invite and `inviteAuth` entry
 
 **Critical**: The `.read` rule for `travelPlans` MUST check `inviteAuth` to allow step 3.
+
+### Plan Overwrite Protection (Important!)
+
+When a user attempts to create a new plan via `handleCreatePlan`:
+
+1. Check Firebase `users/{uid}` for existing `planId`
+2. If plan exists, show confirmation dialog: "您已經有一個旅行計劃。創建新計劃將覆蓋現有計劃。確定要繼續嗎？"
+3. If user cancels: Redirect to existing plan (`setPlanId(existingPlanId)`)
+4. If user confirms: Proceed with plan creation (overwrites existing plan)
+
+**Why This Matters**:
+- Users already have auto-redirect to existing plan on login (via useEffect in App.js)
+- Edge cases (Firebase sync delays) could allow users to see PlanSelection screen
+- Without this check, clicking "Create New Plan" would silently overwrite existing plan data
+- Confirmation dialog prevents accidental data loss
 
 ### PWA Icon Generation
 
@@ -346,3 +362,18 @@ The application received a complete visual overhaul with a new warm, elegant col
 - All CSS updates use the new color variables
 - Responsive font sizing implemented across all form elements
 - Improved hover states with subtle cream backgrounds and soft shadows
+
+## Recent Updates (2025-10-11)
+
+### Security Enhancements
+1. **Plan Overwrite Protection**: Added safety mechanism to prevent accidental plan deletion
+   - Checks for existing plan before creation
+   - Shows confirmation dialog: "您已經有一個旅行計劃。創建新計劃將覆蓋現有計劃。確定要繼續嗎？"
+   - Redirects to existing plan if user cancels
+   - Prevents data loss from accidental clicks on "Create New Plan"
+
+### Why This Update
+- Users with existing plans already have auto-redirect on login
+- Edge cases (Firebase sync delays) could expose PlanSelection screen
+- Without protection, "Create New Plan" would silently overwrite all existing data
+- Confirmation dialog adds critical safety layer for user data protection

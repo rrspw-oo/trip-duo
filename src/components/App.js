@@ -3,6 +3,7 @@ import { differenceInDays } from "date-fns";
 import DOMPurify from "dompurify";
 import debounce from "lodash.debounce";
 import "../styles/App.css";
+import "../styles/noguchi-senda-theme.css";
 import { useAuth } from "../contexts/AuthContext";
 import { database } from "../config/firebase";
 import Login from "./Login";
@@ -115,6 +116,12 @@ function App() {
   const [planUsers, setPlanUsers] = useState([]);
   const [userMetadata, setUserMetadata] = useState({}); // Store user email and displayName
 
+  // Shopping list state
+  const [shoppingListItems, setShoppingListItems] = useState({});
+  const [newShoppingItem, setNewShoppingItem] = useState({
+    itemName: "",
+  });
+
   // Check if user has a plan when they log in
   useEffect(() => {
     if (!user) {
@@ -221,6 +228,7 @@ function App() {
         setSelectedAccommodationId(data.selectedAccommodationId || null);
         setConfirmedAccommodation(data.confirmedAccommodation || null);
         setPreTripItems(data.preTripItems || {});
+        setShoppingListItems(data.shoppingListItems || {});
         setPlanUsers(Object.keys(data.users || {}));
         setUserMetadata(data.userMetadata || {}); // Load user metadata
 
@@ -656,6 +664,51 @@ function App() {
     remove(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`));
   };
 
+  // Shopping list functions
+  const addShoppingItem = () => {
+    if (!planId || !user) return;
+
+    const itemId = Date.now().toString();
+
+    const itemData = {
+      itemName: newShoppingItem.itemName.trim(),
+      addedBy: user.uid,
+      isPurchased: false,
+      timestamp: Date.now(),
+    };
+
+    set(ref(database, `travelPlans/${planId}/shoppingListItems/${itemId}`), itemData);
+
+    setNewShoppingItem({
+      itemName: "",
+    });
+  };
+
+  const toggleShoppingItemCheck = (itemId) => {
+    if (!planId) return;
+
+    const item = shoppingListItems[itemId];
+    if (!item) return;
+
+    const updatedPurchased = !item.isPurchased;
+
+    update(ref(database, `travelPlans/${planId}/shoppingListItems/${itemId}`), {
+      isPurchased: updatedPurchased,
+    });
+  };
+
+  const deleteShoppingItem = (itemId) => {
+    if (!planId || !user) return;
+
+    const item = shoppingListItems[itemId];
+    if (!item || item.addedBy !== user.uid) {
+      alert('只有物品建立者可以刪除此物品');
+      return;
+    }
+
+    remove(ref(database, `travelPlans/${planId}/shoppingListItems/${itemId}`));
+  };
+
   // Daily plans with locations
   const [dailyPlans, setDailyPlans] = useState({});
   const [expandedDays, setExpandedDays] = useState({});
@@ -765,9 +818,24 @@ function App() {
   const handleCreatePlan = async () => {
     if (!user) return;
 
+    // Check if user already has a plan
+    const userRef = ref(database, `users/${user.uid}`);
+    const userSnapshot = await get(userRef);
+
+    if (userSnapshot.exists() && userSnapshot.val().planId) {
+      const confirmOverwrite = window.confirm(
+        '您已經有一個旅行計劃。\n創建新計劃將覆蓋現有計劃。\n\n確定要繼續嗎？'
+      );
+
+      if (!confirmOverwrite) {
+        // User cancelled, redirect to existing plan
+        setPlanId(userSnapshot.val().planId);
+        return;
+      }
+    }
+
     const newPlanId = user.uid;
     const planRef = ref(database, `travelPlans/${newPlanId}`);
-    const userRef = ref(database, `users/${user.uid}`);
 
     // Create new plan
     const initialData = {
@@ -784,6 +852,7 @@ function App() {
       totalDays: 0,
       dailyPlans: {},
       flights: {},
+      shoppingListItems: {},
       createdAt: Date.now(),
     };
 
@@ -1645,6 +1714,14 @@ function App() {
             onAddLocation={addLocationToDay}
             onRemoveLocation={removeLocationFromDay}
             startDate={startDate}
+            shoppingListItems={shoppingListItems}
+            newShoppingItem={newShoppingItem}
+            setNewShoppingItem={setNewShoppingItem}
+            onAddShoppingItem={addShoppingItem}
+            onToggleShoppingItemCheck={toggleShoppingItemCheck}
+            onDeleteShoppingItem={deleteShoppingItem}
+            currentUser={user}
+            userMetadata={userMetadata}
           />
         );
       default:
