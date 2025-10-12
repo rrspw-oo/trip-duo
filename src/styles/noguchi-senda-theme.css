@@ -108,8 +108,7 @@ button[type="submit"]:active {
   font-size: var(--font-base);
 }
 
-.btn-remove,
-.btn-delete-item {
+.btn-remove {
   background: transparent;
   color: var(--text-tertiary);
   border: 2px solid var(--border-color);
@@ -118,12 +117,25 @@ button[type="submit"]:active {
   transition: all var(--transition-fast);
 }
 
-.btn-remove:hover,
-.btn-delete-item:hover {
+.btn-remove:hover {
   background: rgba(212, 135, 109, 0.1);
   border-color: var(--color-terra-cotta);
   color: var(--color-terra-cotta);
   transform: scale(1.05);
+}
+
+.btn-delete-item {
+  background: transparent;
+  color: var(--text-tertiary);
+  border: none;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-delete-item:hover {
+  background: rgba(176, 48, 82, 0.1);
+  color: #B03052;
 }
 
 .btn-icon-only {
@@ -266,8 +278,27 @@ button[type="submit"]:active {
   margin-top: var(--space-lg);
 }
 
-.flight-card,
-.pretrip-item-card,
+.flight-card {
+  background: transparent;
+  border-radius: 0;
+  padding: var(--space-xs) var(--space-sm);
+  margin-bottom: 0;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+  box-shadow: none;
+}
+
+.pretrip-item-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  transition: all var(--transition-fast);
+  box-shadow: none;
+}
+
 .location-card {
   background: white;
   border-radius: var(--radius-xl);
@@ -279,16 +310,20 @@ button[type="submit"]:active {
 }
 
 .flight-card:hover,
-.pretrip-item-card:hover,
 .location-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--color-terra-cotta);
 }
 
+.pretrip-item-card:hover {
+  border-color: var(--color-rose-pink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .pretrip-item-card.completed {
-  background: var(--surface-secondary);
-  opacity: 0.7;
+  background: rgba(235, 232, 219, 0.1);
+  opacity: 0.5;
 }
 
 /* Card header layout */
@@ -308,16 +343,91 @@ button[type="submit"]:active {
   word-wrap: break-word;
 }
 
-.item-footer {
-  margin-top: var(--space-md);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--divider-color);
+/* New item layout styles */
+.item-timestamp {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  opacity: 0.6;
+  margin-bottom: 2px;
 }
 
-.item-creator-info {
-  font-size: var(--font-xs);
+.item-main {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.item-name {
+  font-size: var(--font-base);
+  line-height: 28px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 150px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-name .strikethrough {
+  text-decoration: line-through;
   color: var(--text-tertiary);
 }
+
+.item-avatars {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.btn-delete-item {
+  margin-left: auto;
+}
+
+.user-avatar-check {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  cursor: default;
+}
+
+.user-avatar-check[role="button"] {
+  cursor: pointer;
+}
+
+.user-avatar-check[role="button"]:hover {
+  transform: scale(1.1);
+}
+
+.user-avatar-check.checked {
+  border-width: 2px;
+}
+
+.user-avatar-check.unchecked {
+  background: transparent !important;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.item-options-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: var(--space-xs);
+  padding-left: 0;
+}
+
+/* Legacy .item-footer and .item-creator-info removed - now using .item-timestamp */
 
 /* === DAY ACCORDION === */
 .day-accordion {
@@ -359,17 +469,22 @@ button[type="submit"]:active {
 }
 
 /* === FORMS === */
-.form-group,
-.form-field,
-.form-row {
-  margin-bottom: var(--space-lg);
-}
+/* Removed global margin-bottom from form elements */
 
 .form-container {
   margin-bottom: var(--space-xl);
 }
 
-.item-form,
+.pretrip-items-tab .form-container {
+  margin-bottom: 0;
+}
+
+.item-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -662,11 +777,17 @@ textarea::placeholder {
 }
 
 /* === LISTS & CONTAINERS === */
-.items-container,
+.items-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
 .items-section {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  margin-bottom: var(--space-xl);
 }
 
 .items-list {
@@ -679,7 +800,11 @@ textarea::placeholder {
   font-size: var(--font-lg);
   font-weight: 600;
   color: var(--text-primary);
-  margin: var(--space-lg) 0 var(--space-md) 0;
+  margin: 0 0 var(--space-md) 0;
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(229, 152, 155, 0.15);
+  border-left: 4px solid var(--color-rose-pink);
+  border-radius: var(--radius-sm);
 }
 
 .pretrip-items-tab,
@@ -892,9 +1017,7 @@ textarea::placeholder {
     margin-bottom: var(--space-lg);
   }
 
-  .form-row {
-    margin-bottom: var(--space-md);
-  }
+  /* Removed .form-row margin-bottom */
 
   input[type="text"],
   input[type="date"],

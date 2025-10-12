@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { getUserInitials, getAvatarColor } from "../../utils/firebaseHelpers";
 
 const PreTripItemCard = ({
@@ -7,17 +7,18 @@ const PreTripItemCard = ({
   currentUser,
   onToggleCheck,
   onDelete,
-  userMetadata
+  userMetadata,
+  onAddOption,
+  onSelectOption,
+  onDeleteOption
 }) => {
-  const { itemName, addedBy, isShared, checkedBy = [], timestamp } = item;
+  const { itemName, addedBy, isShared, checkedBy = [], timestamp, options = {}, selectedOption } = item;
+  const [showOptions, setShowOptions] = useState(false);
 
   // Calculate completion status
   const isCompleted = isShared
     ? allUsers.every(uid => checkedBy.includes(uid))
     : checkedBy.includes(addedBy);
-
-  // Check if current user has checked this item
-  const isCheckedByCurrentUser = checkedBy.includes(currentUser.uid);
 
   // Only show personal items to the owner
   if (!isShared && addedBy !== currentUser.uid) {
@@ -34,7 +35,7 @@ const PreTripItemCard = ({
     }
   };
 
-  // Format timestamp
+  // Format timestamp - only time, no day
   const formatTimestamp = (ts) => {
     if (!ts) return '';
     const date = new Date(ts);
@@ -49,11 +50,63 @@ const PreTripItemCard = ({
   const creatorInitials = getUserInitials(creatorEmail);
   const createdTime = formatTimestamp(timestamp);
 
+  // Get options info
+  const optionsArray = Object.entries(options || {}).map(([id, opt]) => ({ ...opt, id }));
+  const hasOptions = optionsArray.length > 0;
+  const selectedOpt = selectedOption ? options[selectedOption] : null;
+
+  // Prepare user list for display
+  const usersToDisplay = isShared ? allUsers : [addedBy];
+
   return (
     <div className={`pretrip-item-card ${isCompleted ? 'completed' : ''}`}>
       <div className="item-content">
-        <div className="item-header">
-          <h3 className={isCompleted ? 'strikethrough' : ''}>{itemName}</h3>
+        {/* Row 1: Timestamp */}
+        <div className="item-timestamp">
+          {creatorInitials} {createdTime}
+        </div>
+
+        {/* Row 2: Item name + avatars + delete */}
+        <div className="item-main">
+          <div className="item-name">
+            <span className={isCompleted ? 'strikethrough' : ''}>{itemName}</span>
+            {selectedOpt && (
+              <span className="selected-option-badge">
+                ✓ {selectedOpt.name} - ¥{selectedOpt.price}
+              </span>
+            )}
+          </div>
+
+          {/* User avatars */}
+          <div className="item-avatars">
+            {usersToDisplay.map(uid => {
+              const isChecked = checkedBy.includes(uid);
+              const userMeta = userMetadata?.[uid];
+              const userEmail = userMeta?.email || uid;
+              const initials = getUserInitials(userEmail);
+              const color = getAvatarColor(userEmail);
+              const isCurrentUserAvatar = uid === currentUser.uid;
+
+              return (
+                <div
+                  key={uid}
+                  className={`user-avatar-check ${isChecked ? 'checked' : 'unchecked'}`}
+                  style={{
+                    backgroundColor: isChecked ? color : 'transparent',
+                    borderColor: color,
+                    color: isChecked ? 'white' : color
+                  }}
+                  onClick={isCurrentUserAvatar ? handleToggleCheck : undefined}
+                  title={`${userEmail}${isCurrentUserAvatar ? ' (點擊切換)' : ''}`}
+                  role={isCurrentUserAvatar ? 'button' : undefined}
+                >
+                  {initials}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Delete button */}
           {addedBy === currentUser.uid && (
             <button
               onClick={handleDelete}
@@ -68,58 +121,58 @@ const PreTripItemCard = ({
           )}
         </div>
 
-        {isShared ? (
-          <div className="shared-checklist">
-            {allUsers.map(uid => {
-              const isChecked = checkedBy.includes(uid);
-              const userMeta = userMetadata?.[uid];
-              const userEmail = userMeta?.email || uid;
-              const initials = getUserInitials(userEmail);
-              const color = getAvatarColor(userEmail);
-              const isCurrentUserRow = uid === currentUser.uid;
-
-              return (
-                <div key={uid} className="user-check-status">
-                  <div
-                    className="user-avatar-small"
-                    style={{ backgroundColor: color }}
-                    title={uid}
-                  >
-                    {initials}
-                  </div>
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={isCurrentUserRow ? handleToggleCheck : undefined}
-                      className="round-checkbox"
-                      disabled={!isCurrentUserRow}
-                    />
-                    {isChecked && <span>已備好</span>}
-                  </label>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="personal-checklist">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={isCheckedByCurrentUser}
-                onChange={handleToggleCheck}
-                className="round-checkbox"
-              />
-              {isCheckedByCurrentUser && <span>已備好</span>}
-            </label>
+        {/* Options button row */}
+        {hasOptions && (
+          <div className="item-options-row">
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className="btn-options"
+              title="查看比較方案"
+            >
+              比較方案 ({optionsArray.length})
+            </button>
           </div>
         )}
 
-        <div className="item-footer">
-          <span className="item-creator-info">
-            {creatorInitials} {createdTime}
-          </span>
-        </div>
+        {/* Options list - shown when expanded */}
+        {showOptions && hasOptions && (
+          <div className="options-list-container">
+            <p className="options-hint">點擊選擇您決定的方案：</p>
+            {optionsArray.map(opt => (
+              <div
+                key={opt.id}
+                className={`option-item ${selectedOption === opt.id ? 'selected' : ''}`}
+                onClick={() => onSelectOption && onSelectOption(item.id, opt.id)}
+              >
+                <div className="option-main">
+                  <input
+                    type="radio"
+                    checked={selectedOption === opt.id}
+                    onChange={() => {}}
+                    className="option-radio"
+                  />
+                  <div className="option-info">
+                    <strong>{opt.name}</strong>
+                    <span className="option-price">¥{opt.price}</span>
+                  </div>
+                </div>
+                {opt.details && <div className="option-details">{opt.details}</div>}
+                {opt.notes && <div className="option-notes">備註：{opt.notes}</div>}
+                {opt.link && (
+                  <a
+                    href={opt.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="option-link"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    查看連結 →
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -10,7 +10,9 @@ const DailyItineraryTab = ({
   onToggleDayCompleted,
   onAddLocation,
   onRemoveLocation,
-  startDate
+  onUpdateDayTitle,
+  startDate,
+  currentUser
 }) => {
   // Generate all days based on totalDays
   const allDays = Array.from({ length: totalDays }, (_, i) => `Day ${i + 1}`);
@@ -50,6 +52,8 @@ const DailyItineraryTab = ({
             onToggleCompleted={onToggleDayCompleted}
             onAddLocation={onAddLocation}
             onRemoveLocation={onRemoveLocation}
+            onUpdateDayTitle={onUpdateDayTitle}
+            currentUser={currentUser}
           />
         ))
       ) : (

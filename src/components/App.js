@@ -664,6 +664,42 @@ function App() {
     remove(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`));
   };
 
+  // Option management functions
+  const addOption = (itemId, optionData) => {
+    if (!planId || !user) return;
+
+    const optionId = Date.now().toString();
+    const optionWithMeta = {
+      ...optionData,
+      addedBy: user.uid,
+      timestamp: Date.now()
+    };
+
+    update(ref(database, `travelPlans/${planId}/preTripItems/${itemId}/options/${optionId}`), optionWithMeta);
+  };
+
+  const selectOption = (itemId, optionId) => {
+    if (!planId) return;
+
+    update(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`), {
+      selectedOption: optionId
+    });
+  };
+
+  const deleteOption = (itemId, optionId) => {
+    if (!planId || !user) return;
+
+    const item = preTripItems[itemId];
+    const option = item?.options?.[optionId];
+
+    if (!option || option.addedBy !== user.uid) {
+      alert('只有方案建立者可以刪除此方案');
+      return;
+    }
+
+    remove(ref(database, `travelPlans/${planId}/preTripItems/${itemId}/options/${optionId}`));
+  };
+
   // Shopping list functions
   const addShoppingItem = () => {
     if (!planId || !user) return;
@@ -760,6 +796,11 @@ function App() {
       : Object.values(currentPlan.locations || {});
     const newLocations = locationsArray.filter((_, idx) => idx !== locationIndex);
     updateDayPlan(day, { ...currentPlan, locations: newLocations });
+  };
+
+  const updateDayTitle = (day, title) => {
+    const currentPlan = dailyPlans[day] || { locations: [] };
+    updateDayPlan(day, { ...currentPlan, title: title.trim() });
   };
 
 
@@ -1698,6 +1739,9 @@ function App() {
             onAddPreTripItem={addPreTripItem}
             onToggleItemCheck={toggleItemCheck}
             onDeletePreTripItem={deletePreTripItem}
+            onAddOption={addOption}
+            onSelectOption={selectOption}
+            onDeleteOption={deleteOption}
             allUsers={planUsers}
             userMetadata={userMetadata}
           />
@@ -1713,6 +1757,7 @@ function App() {
             onToggleDayCompleted={toggleDayCompleted}
             onAddLocation={addLocationToDay}
             onRemoveLocation={removeLocationFromDay}
+            onUpdateDayTitle={updateDayTitle}
             startDate={startDate}
             shoppingListItems={shoppingListItems}
             newShoppingItem={newShoppingItem}
@@ -1779,6 +1824,9 @@ function App() {
             onAddPreTripItem={addPreTripItem}
             onToggleItemCheck={toggleItemCheck}
             onDeletePreTripItem={deletePreTripItem}
+            onAddOption={addOption}
+            onSelectOption={selectOption}
+            onDeleteOption={deleteOption}
             allUsers={planUsers}
             userMetadata={userMetadata}
           />

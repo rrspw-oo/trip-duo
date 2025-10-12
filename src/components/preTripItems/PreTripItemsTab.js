@@ -9,6 +9,9 @@ const PreTripItemsTab = ({
   onAddPreTripItem,
   onToggleItemCheck,
   onDeletePreTripItem,
+  onAddOption,
+  onSelectOption,
+  onDeleteOption,
   allUsers,
   currentUser,
   userMetadata
@@ -61,6 +64,9 @@ const PreTripItemsTab = ({
                   currentUser={currentUser}
                   onToggleCheck={onToggleItemCheck}
                   onDelete={onDeletePreTripItem}
+                  onAddOption={onAddOption}
+                  onSelectOption={onSelectOption}
+                  onDeleteOption={onDeleteOption}
                   userMetadata={userMetadata}
                 />
               ))}
@@ -80,6 +86,9 @@ const PreTripItemsTab = ({
                   currentUser={currentUser}
                   onToggleCheck={onToggleItemCheck}
                   onDelete={onDeletePreTripItem}
+                  onAddOption={onAddOption}
+                  onSelectOption={onSelectOption}
+                  onDeleteOption={onDeleteOption}
                   userMetadata={userMetadata}
                 />
               ))}

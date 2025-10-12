@@ -8,13 +8,9 @@ export const AIRLINE_OPTIONS = [
 
 // Transportation options for daily plan locations
 export const TRANSPORTATION_OPTIONS = [
-  "山手線",
-  "中央線",
-  "京濱東北線",
-  "JR線",
   "地鐵",
-  "步行",
-  "巴士"
+  "巴士",
+  "步行"
 ];
 
 // Time period options for daily plan locations

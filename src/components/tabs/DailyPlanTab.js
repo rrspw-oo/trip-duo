@@ -13,6 +13,7 @@ const DailyPlanTab = ({
   onToggleDayCompleted,
   onAddLocation,
   onRemoveLocation,
+  onUpdateDayTitle,
   startDate,
 
   // Shopping list props
@@ -56,7 +57,9 @@ const DailyPlanTab = ({
             onToggleDayCompleted={onToggleDayCompleted}
             onAddLocation={onAddLocation}
             onRemoveLocation={onRemoveLocation}
+            onUpdateDayTitle={onUpdateDayTitle}
             startDate={startDate}
+            currentUser={currentUser}
           />
         )}
 
