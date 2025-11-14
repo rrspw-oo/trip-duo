@@ -13,6 +13,7 @@ const DailyPlanTab = ({
   onToggleDayCompleted,
   onAddLocation,
   onRemoveLocation,
+  onUpdateLocation,
   onUpdateDayTitle,
   startDate,
 
@@ -23,60 +24,65 @@ const DailyPlanTab = ({
   onAddShoppingItem,
   onToggleShoppingItemCheck,
   onDeleteShoppingItem,
+  onUpdateShoppingItem,
+  allUsers,
   currentUser,
-  userMetadata
+  userMetadata,
 }) => {
   const [activeDailyPlanSubTab, setActiveDailyPlanSubTab] = useState(1);
 
   return (
-    <div className="tab-content pre-trip-tab-content">
-      <h2>每日規劃</h2>
+    <section className="tab-content pre-trip-tab-content">
+      <div className="pre-trip-shell">
+        <nav className="pre-trip-sub-tabs" aria-label="每日規劃分類">
+          {DAILY_PLAN_SUB_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              className={`pre-trip-sub-tab ${
+                activeDailyPlanSubTab === tab.id ? "active" : ""
+              }`}
+              onClick={() => setActiveDailyPlanSubTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
 
-      {/* Daily plan sub-tabs navigation */}
-      <div className="pre-trip-sub-tabs">
-        {DAILY_PLAN_SUB_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            className={`pre-trip-sub-tab ${activeDailyPlanSubTab === tab.id ? "active" : ""}`}
-            onClick={() => setActiveDailyPlanSubTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
+        <div className="pre-trip-sub-tab-content">
+          {activeDailyPlanSubTab === 1 && (
+            <DailyItineraryTab
+              totalDays={totalDays}
+              dailyPlans={dailyPlans}
+              skippedDays={skippedDays}
+              expandedDays={expandedDays}
+              onToggleDayExpanded={onToggleDayExpanded}
+              onToggleDayCompleted={onToggleDayCompleted}
+              onAddLocation={onAddLocation}
+              onRemoveLocation={onRemoveLocation}
+              onUpdateLocation={onUpdateLocation}
+              onUpdateDayTitle={onUpdateDayTitle}
+              startDate={startDate}
+              currentUser={currentUser}
+            />
+          )}
+
+          {activeDailyPlanSubTab === 2 && (
+            <ShoppingListTab
+              shoppingListItems={shoppingListItems}
+              newShoppingItem={newShoppingItem}
+              setNewShoppingItem={setNewShoppingItem}
+              onAddShoppingItem={onAddShoppingItem}
+              onToggleItemCheck={onToggleShoppingItemCheck}
+              onDeleteShoppingItem={onDeleteShoppingItem}
+              onUpdateShoppingItem={onUpdateShoppingItem}
+              allUsers={allUsers}
+              currentUser={currentUser}
+              userMetadata={userMetadata}
+            />
+          )}
+        </div>
       </div>
-
-      {/* Daily plan sub-tab content */}
-      <div className="pre-trip-sub-tab-content">
-        {activeDailyPlanSubTab === 1 && (
-          <DailyItineraryTab
-            totalDays={totalDays}
-            dailyPlans={dailyPlans}
-            skippedDays={skippedDays}
-            expandedDays={expandedDays}
-            onToggleDayExpanded={onToggleDayExpanded}
-            onToggleDayCompleted={onToggleDayCompleted}
-            onAddLocation={onAddLocation}
-            onRemoveLocation={onRemoveLocation}
-            onUpdateDayTitle={onUpdateDayTitle}
-            startDate={startDate}
-            currentUser={currentUser}
-          />
-        )}
-
-        {activeDailyPlanSubTab === 2 && (
-          <ShoppingListTab
-            shoppingListItems={shoppingListItems}
-            newShoppingItem={newShoppingItem}
-            setNewShoppingItem={setNewShoppingItem}
-            onAddShoppingItem={onAddShoppingItem}
-            onToggleItemCheck={onToggleShoppingItemCheck}
-            onDeleteShoppingItem={onDeleteShoppingItem}
-            currentUser={currentUser}
-            userMetadata={userMetadata}
-          />
-        )}
-      </div>
-    </div>
+    </section>
   );
 };
 

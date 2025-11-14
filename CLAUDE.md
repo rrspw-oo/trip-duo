@@ -11,40 +11,46 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ** SECURITY NOTE**: This project is NOT intended for public GitHub. All Firebase credentials are stored locally in `.env` file.
 
-##  IMPORTANT: Console Warnings
+## IMPORTANT: Console Warnings
 
 ### Cross-Origin-Opener-Policy (COOP) Warning - SAFE TO IGNORE
 
 **Warning Message**:
+
 ```
 Cross-Origin-Opener-Policy policy would block the window.close call.
 cb=gapi.loaded_0?le=scs:195
 ```
 
 **Why This Happens**:
+
 - Firebase Auth uses `signInWithPopup()` for Google OAuth login
 - Google's OAuth page sets strict COOP headers for security
 - Browser prevents popup window close detection due to cross-origin policy
 - This is **EXPECTED BEHAVIOR** from Google's OAuth security
 
 **Is This a Problem?**:
--  **NO** - Authentication works perfectly
--  **NO** - No security risk
--  **NO** - No functionality impact
--  **Safe to ignore** - This is a browser informational message, not an error
+
+- **NO** - Authentication works perfectly
+- **NO** - No security risk
+- **NO** - No functionality impact
+- **Safe to ignore** - This is a browser informational message, not an error
 
 **Why We Use Popup Mode**:
+
 1. **Better UX** - No page reload, instant feedback
 2. **PWA Compatible** - Works with Service Workers
 3. **Reliable** - No redirect timing issues
 4. **Recommended** - Firebase official documentation recommends popup for web apps
 
 **Alternative Solutions (NOT RECOMMENDED)**:
+
 - `signInWithRedirect()` - Causes issues with Service Workers and PWA
 - Custom COOP headers - Requires server configuration, breaks Google OAuth
 - Suppressing console warnings - Hides potentially useful information
 
 **Action Required**:
+
 - **NONE** - Simply ignore this warning in the browser console
 - **DO NOT** attempt to "fix" this warning by changing auth methods
 - **DO NOT** modify COOP headers (will break authentication)
@@ -52,30 +58,35 @@ cb=gapi.loaded_0?le=scs:195
 ### auth/popup-closed-by-user - User Cancelled Login
 
 **Error Message**:
+
 ```
 Firebase: Error (auth/popup-closed-by-user)
 ```
 
 **Why This Happens**:
+
 - User clicks "Continue with Google"
 - Popup window opens with Google sign-in
 - User closes the popup before completing sign-in
 - Firebase throws this error
 
 **Is This a Problem?**:
--  **NO** - This is expected user behavior
--  **NO** - Not a technical error
--  **Already handled** - Error is silently caught and ignored in `AuthContext.js`
+
+- **NO** - This is expected user behavior
+- **NO** - Not a technical error
+- **Already handled** - Error is silently caught and ignored in `AuthContext.js`
 
 **Error Handling**:
+
 ```javascript
 // In AuthContext.js
-if (error.code === 'auth/popup-closed-by-user') {
+if (error.code === "auth/popup-closed-by-user") {
   return; // Silently ignore, user intentionally cancelled
 }
 ```
 
 **Action Required**:
+
 - **NONE** - User can simply click login again when ready
 
 ## Development Commands
@@ -218,6 +229,7 @@ When a user attempts to create a new plan via `handleCreatePlan`:
 4. If user confirms: Proceed with plan creation (overwrites existing plan)
 
 **Why This Matters**:
+
 - Users already have auto-redirect to existing plan on login (via useEffect in App.js)
 - Edge cases (Firebase sync delays) could allow users to see PlanSelection screen
 - Without this check, clicking "Create New Plan" would silently overwrite existing plan data
@@ -237,6 +249,7 @@ pwa-asset-generator icon-192-maskable.svg public/ \
 ```
 
 This generates:
+
 - `manifest-icon-192.maskable.png`
 - `manifest-icon-512.maskable.png`
 - `apple-icon-180.png`
@@ -250,26 +263,31 @@ This generates:
 The app has been refactored from a monolithic 1,486-line App.js to a modular architecture:
 
 **Principles**:
--  **No design changes** - UI/UX remains identical
--  **No functionality changes** - All features work exactly as before
--  **Improved reusability** - Components can be reused across the app
--  **Better maintainability** - Easier to locate and modify code
+
+- **No design changes** - UI/UX remains identical
+- **No functionality changes** - All features work exactly as before
+- **Improved reusability** - Components can be reused across the app
+- **Better maintainability** - Easier to locate and modify code
 
 **What Was Modularized**:
 
 1. **Constants** (`src/constants/options.js`)
+
    - Airline options, transportation options, time periods, categories, tabs config
    - Single source of truth for dropdown values
 
 2. **Utilities** (`src/utils/`)
+
    - `dateHelpers.js`: Date calculations, daily plan generation
    - `inviteCodeGenerator.js`: Secure random code generation
    - `firebaseHelpers.js`: User avatar initials and colors
 
 3. **Common Components** (`src/components/common/`)
+
    - `CustomDropdown.js`: Reusable dropdown with keyboard support
 
 4. **Feature Components** (`src/components/flights/`, `src/components/dailyPlan/`)
+
    - Separated by feature domain
    - Self-contained with clear props interface
 
@@ -278,11 +296,13 @@ The app has been refactored from a monolithic 1,486-line App.js to a modular arc
    - Props-based communication with parent App.js
 
 **Legacy Code Note**:
+
 - Old inline Tab1-Tab4 definitions still exist in App.js but are unused
 - These are safe to remove but kept for reference during transition
 - ESLint warnings about unused variables (Tab1, Tab2, Tab3, Tab4) can be ignored
 
 **Import Pattern**:
+
 ```javascript
 // In App.js
 import { TABS } from "../constants/options";
@@ -331,9 +351,11 @@ REACT_APP_FIREBASE_APP_ID=
 ## Recent Updates (2025-10-05)
 
 ### Design System Redesign
+
 The application received a complete visual overhaul with a new warm, elegant color palette:
 
 **Color Palette**:
+
 - `#D76C82` (Coral Pink) - Primary accent, outbound flights
 - `#FFB4A2` (Peach) - Secondary accent, return flights
 - `#E5989B` (Rose Pink) - Tags and labels
@@ -342,23 +364,27 @@ The application received a complete visual overhaul with a new warm, elegant col
 - `#FFCDB2` (Light Peach) - Hover states
 
 **Key Changes**:
+
 - Removed deep rose (`#B03052`) and dark brown (`#3D0301`) from color scheme
 - Softer, more approachable visual design
 - Improved accessibility with better contrast ratios
 
 ### Flight Management Updates
+
 1. **Form Layout**: Date fields moved to header row next to flight type labels
 2. **Time Display**: Simplified to show only time (removed redundant date fields)
 3. **Visual Distinction**: Clear color differentiation between outbound/return
 4. **Form Notes**: Enhanced placeholder readability (35% opacity) with responsive typography
 
 ### Daily Planning Enhancements
+
 1. **Date-based Completion**: Past days automatically marked as completed
 2. **Persistent Days**: Fixed bug where days disappeared after deleting locations
 3. **Creator Attribution**: Shows who added each location with Gmail icon
 4. **Sorting Logic**: Completed/past days move to bottom while remaining viewable
 
 ### Technical Notes
+
 - All CSS updates use the new color variables
 - Responsive font sizing implemented across all form elements
 - Improved hover states with subtle cream backgrounds and soft shadows
@@ -366,6 +392,7 @@ The application received a complete visual overhaul with a new warm, elegant col
 ## Recent Updates (2025-10-11)
 
 ### Security Enhancements
+
 1. **Plan Overwrite Protection**: Added safety mechanism to prevent accidental plan deletion
    - Checks for existing plan before creation
    - Shows confirmation dialog: "您已經有一個旅行計劃。創建新計劃將覆蓋現有計劃。確定要繼續嗎？"
@@ -373,7 +400,10 @@ The application received a complete visual overhaul with a new warm, elegant col
    - Prevents data loss from accidental clicks on "Create New Plan"
 
 ### Why This Update
+
 - Users with existing plans already have auto-redirect on login
 - Edge cases (Firebase sync delays) could expose PlanSelection screen
 - Without protection, "Create New Plan" would silently overwrite all existing data
 - Confirmation dialog adds critical safety layer for user data protection
+
+

@@ -9,25 +9,35 @@ const PreTripItemsTab = ({
   onAddPreTripItem,
   onToggleItemCheck,
   onDeletePreTripItem,
+  onUpdatePreTripItem,
   onAddOption,
   onSelectOption,
   onDeleteOption,
   allUsers,
   currentUser,
-  userMetadata
+  userMetadata,
 }) => {
   const [showForm] = useState(true);
+  const [activeTab, setActiveTab] = useState('shared');
 
   // Get list of existing item names for duplicate checking
-  const existingItemNames = Object.values(preTripItems).map(item => item.itemName);
+  const existingItemNames = Object.values(preTripItems).map(
+    (item) => item.itemName
+  );
 
-  // Separate shared and personal items
-  const sharedItems = Object.entries(preTripItems)
-    .filter(([_, item]) => item.isShared)
-    .map(([id, item]) => ({ ...item, id }));
+  const otherUserId = allUsers.find(uid => uid !== currentUser.uid);
 
-  const personalItems = Object.entries(preTripItems)
-    .filter(([_, item]) => !item.isShared && item.addedBy === currentUser.uid)
+  const itemsToDisplay = Object.entries(preTripItems)
+    .filter(([_, item]) => {
+      if (activeTab === 'shared') {
+        return item.isShared;
+      } else if (activeTab === 'mine') {
+        return !item.isShared && item.addedBy === currentUser.uid;
+      } else if (activeTab === 'other') {
+        return !item.isShared && item.addedBy === otherUserId;
+      }
+      return false;
+    })
     .map(([id, item]) => ({ ...item, id }));
 
   const handleAddItem = () => {
@@ -36,10 +46,6 @@ const PreTripItemsTab = ({
 
   return (
     <div className="pretrip-items-tab">
-      <div className="tab-header">
-        <h2>行前必備清單</h2>
-      </div>
-
       {showForm && (
         <div className="form-container">
           <PreTripItemForm
@@ -52,56 +58,57 @@ const PreTripItemsTab = ({
       )}
 
       <div className="items-container">
-        {sharedItems.length > 0 && (
-          <div className="items-section">
-            <h3 className="section-title">共同必備</h3>
-            <div className="items-list">
-              {sharedItems.map(item => (
-                <PreTripItemCard
-                  key={item.id}
-                  item={item}
-                  allUsers={allUsers}
-                  currentUser={currentUser}
-                  onToggleCheck={onToggleItemCheck}
-                  onDelete={onDeletePreTripItem}
-                  onAddOption={onAddOption}
-                  onSelectOption={onSelectOption}
-                  onDeleteOption={onDeleteOption}
-                  userMetadata={userMetadata}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        <div className="unified-items-tabs">
+          <button
+            className={`unified-tab-btn ${activeTab === 'shared' ? 'active' : ''}`}
+            onClick={() => setActiveTab('shared')}
+          >
+            共同必備
+          </button>
+          <button
+            className={`unified-tab-btn ${activeTab === 'mine' ? 'active' : ''}`}
+            onClick={() => setActiveTab('mine')}
+          >
+            個人必備
+          </button>
+          {otherUserId && (
+            <button
+              className={`unified-tab-btn ${activeTab === 'other' ? 'active' : ''}`}
+              onClick={() => setActiveTab('other')}
+            >
+              {(() => {
+                const userMeta = userMetadata?.[otherUserId];
+                const userEmail = userMeta?.email || otherUserId;
+                const userName = userEmail.split('@')[0];
+                return userName;
+              })()}
+            </button>
+          )}
+        </div>
 
-        {personalItems.length > 0 && (
-          <div className="items-section">
-            <h3 className="section-title">個人必備</h3>
-            <div className="items-list">
-              {personalItems.map(item => (
-                <PreTripItemCard
-                  key={item.id}
-                  item={item}
-                  allUsers={allUsers}
-                  currentUser={currentUser}
-                  onToggleCheck={onToggleItemCheck}
-                  onDelete={onDeletePreTripItem}
-                  onAddOption={onAddOption}
-                  onSelectOption={onSelectOption}
-                  onDeleteOption={onDeleteOption}
-                  userMetadata={userMetadata}
-                />
-              ))}
+        <div className="items-list">
+          {itemsToDisplay.length > 0 ? (
+            itemsToDisplay.map((item) => (
+              <PreTripItemCard
+                key={item.id}
+                item={item}
+                allUsers={allUsers}
+                currentUser={currentUser}
+                onToggleCheck={onToggleItemCheck}
+                onDelete={onDeletePreTripItem}
+                onUpdate={onUpdatePreTripItem}
+                onAddOption={onAddOption}
+                onSelectOption={onSelectOption}
+                onDeleteOption={onDeleteOption}
+                userMetadata={userMetadata}
+              />
+            ))
+          ) : (
+            <div className="empty-state">
+              <p>此分類尚未新增任何物品</p>
             </div>
-          </div>
-        )}
-
-        {sharedItems.length === 0 && personalItems.length === 0 && !showForm && (
-          <div className="empty-state">
-            <p>尚未新增任何物品</p>
-            <p className="empty-state-hint">點擊「+ 新增物品」開始建立清單</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

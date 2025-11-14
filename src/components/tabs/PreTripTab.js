@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import TravelTimeTab from "./TravelTimeTab";
 import FlightTab from "./FlightTab";
 import AccommodationTab from "../accommodations/AccommodationTab";
 import PreTripItemsTab from "../preTripItems/PreTripItemsTab";
-import { PRETRIP_SUB_TABS } from "../../constants/options";
 
 const PreTripTab = ({
+  activePreTripSubTab,
+
   // Travel Time props
   startDate,
   endDate,
@@ -49,93 +50,78 @@ const PreTripTab = ({
   onAddPreTripItem,
   onToggleItemCheck,
   onDeletePreTripItem,
+  onUpdatePreTripItem,
   allUsers,
   userMetadata,
 }) => {
-  const [activePreTripSubTab, setActivePreTripSubTab] = useState(1);
-
   return (
-    <div className="tab-content pre-trip-tab-content">
-      <h2>行前安排</h2>
+    <section className="tab-content pre-trip-tab-content">
+      <div className="pre-trip-shell">
+        <div className="pre-trip-sub-tab-content">
+          {activePreTripSubTab === 1 && (
+            <TravelTimeTab
+              startDate={startDate}
+              endDate={endDate}
+              totalDays={totalDays}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+              onCalculateDays={onCalculateDays}
+            />
+          )}
 
-      {/* Pre-trip sub-tabs navigation */}
-      <div className="pre-trip-sub-tabs">
-        {PRETRIP_SUB_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            className={`pre-trip-sub-tab ${activePreTripSubTab === tab.id ? "active" : ""}`}
-            onClick={() => setActivePreTripSubTab(tab.id)}
-          >
-            <span className="desktop-label">{tab.label}</span>
-            <span className="mobile-label">{tab.mobileLabel}</span>
-          </button>
-        ))}
+          {activePreTripSubTab === 2 && (
+            <FlightTab
+              flights={flights}
+              newFlight={newFlight}
+              setNewFlight={setNewFlight}
+              editingId={editingFlightId}
+              editedFlight={editedFlight}
+              onAddFlight={onAddFlight}
+              onStartEdit={onStartEditFlight}
+              onSaveEdit={onSaveEditFlight}
+              onCancelEdit={onCancelEditFlight}
+              onDeleteFlight={onDeleteFlight}
+              onUpdateEditedField={onUpdateEditedFlightField}
+              onVote={onFlightVote}
+              onAddComment={onAddFlightComment}
+              onDeleteComment={onDeleteFlightComment}
+              currentUser={currentUser}
+              startDate={startDate}
+              endDate={endDate}
+              selectedFlightId={selectedFlightId}
+              onSelectFlight={onSelectFlight}
+              onConfirmFlight={onConfirmFlight}
+              confirmedFlight={confirmedFlight}
+              onUpdateConfirmedFlight={onUpdateConfirmedFlight}
+              onClearConfirmedFlight={onClearConfirmedFlight}
+            />
+          )}
+
+          {activePreTripSubTab === 3 && (
+            <AccommodationTab
+              confirmedAccommodation={confirmedAccommodation}
+              onSaveConfirmedAccommodation={onSaveConfirmedAccommodation}
+              onClearConfirmedAccommodation={onClearConfirmedAccommodation}
+            />
+          )}
+
+          {activePreTripSubTab === 4 && (
+            <PreTripItemsTab
+              preTripItems={preTripItems}
+              newPreTripItem={newPreTripItem}
+              setNewPreTripItem={setNewPreTripItem}
+              onAddPreTripItem={onAddPreTripItem}
+              onToggleItemCheck={onToggleItemCheck}
+              onDeletePreTripItem={onDeletePreTripItem}
+              onUpdatePreTripItem={onUpdatePreTripItem}
+              allUsers={allUsers}
+              currentUser={currentUser}
+              userMetadata={userMetadata}
+            />
+          )}
+        </div>
       </div>
-
-      {/* Pre-trip sub-tab content */}
-      <div className="pre-trip-sub-tab-content">
-        {activePreTripSubTab === 1 && (
-          <TravelTimeTab
-            startDate={startDate}
-            endDate={endDate}
-            totalDays={totalDays}
-            setStartDate={setStartDate}
-            setEndDate={setEndDate}
-            onCalculateDays={onCalculateDays}
-          />
-        )}
-
-        {activePreTripSubTab === 2 && (
-          <FlightTab
-            flights={flights}
-            newFlight={newFlight}
-            setNewFlight={setNewFlight}
-            editingId={editingFlightId}
-            editedFlight={editedFlight}
-            onAddFlight={onAddFlight}
-            onStartEdit={onStartEditFlight}
-            onSaveEdit={onSaveEditFlight}
-            onCancelEdit={onCancelEditFlight}
-            onDeleteFlight={onDeleteFlight}
-            onUpdateEditedField={onUpdateEditedFlightField}
-            onVote={onFlightVote}
-            onAddComment={onAddFlightComment}
-            onDeleteComment={onDeleteFlightComment}
-            currentUser={currentUser}
-            startDate={startDate}
-            endDate={endDate}
-            selectedFlightId={selectedFlightId}
-            onSelectFlight={onSelectFlight}
-            onConfirmFlight={onConfirmFlight}
-            confirmedFlight={confirmedFlight}
-            onUpdateConfirmedFlight={onUpdateConfirmedFlight}
-            onClearConfirmedFlight={onClearConfirmedFlight}
-          />
-        )}
-
-        {activePreTripSubTab === 3 && (
-          <AccommodationTab
-            confirmedAccommodation={confirmedAccommodation}
-            onSaveConfirmedAccommodation={onSaveConfirmedAccommodation}
-            onClearConfirmedAccommodation={onClearConfirmedAccommodation}
-          />
-        )}
-
-        {activePreTripSubTab === 4 && (
-          <PreTripItemsTab
-            preTripItems={preTripItems}
-            newPreTripItem={newPreTripItem}
-            setNewPreTripItem={setNewPreTripItem}
-            onAddPreTripItem={onAddPreTripItem}
-            onToggleItemCheck={onToggleItemCheck}
-            onDeletePreTripItem={onDeletePreTripItem}
-            allUsers={allUsers}
-            currentUser={currentUser}
-            userMetadata={userMetadata}
-          />
-        )}
-      </div>
-    </div>
+    </section>
   );
 };
 

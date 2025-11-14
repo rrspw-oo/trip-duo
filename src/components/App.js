@@ -19,15 +19,19 @@ import {
 } from "firebase/database";
 
 // Import constants
-import { TABS } from "../constants/options";
+import { TABS, PRETRIP_SUB_TABS } from "../constants/options";
 
 // Import utilities
-import { calculateDaysFromDates, generateDailyPlansStructure } from "../utils/dateHelpers";
+import {
+  calculateDaysFromDates,
+  generateDailyPlansStructure,
+} from "../utils/dateHelpers";
 import { generateSecureInviteCode } from "../utils/inviteCodeGenerator";
 import { getUserInitials, getAvatarColor } from "../utils/firebaseHelpers";
 
 // Import components
 import CustomDropdown from "./common/CustomDropdown";
+import DeleteIcon from "./common/DeleteIcon";
 
 // Import Tab components
 import PreTripTab from "./tabs/PreTripTab";
@@ -45,14 +49,16 @@ const createEmptyAccommodationDetails = () => ({
   bookingDate: "",
   bookingCode: "",
   bookingUrl: "",
-  isPaid: false,
+  paymentStatus: "unpaid",
   routes: [],
+  arrivalMethods: [],
   notes: "",
 });
 
 function App() {
   const { user, logout, loading } = useAuth();
   const [currentTab, setCurrentTab] = useState(1);
+  const [activePreTripSubTab, setActivePreTripSubTab] = useState(1);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [totalDays, setTotalDays] = useState(0);
@@ -123,6 +129,12 @@ function App() {
     itemName: "",
   });
 
+  const userDisplayName =
+    (user?.displayName && user.displayName.trim()) ||
+    (user?.email ? user.email.split("@")[0] : "") ||
+    "旅伴";
+  const userEmail = user?.email || "";
+
   // Check if user has a plan when they log in
   useEffect(() => {
     if (!user) {
@@ -147,7 +159,9 @@ function App() {
     };
 
     checkUserPlan();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   // Listen to user plan changes (after joining a plan)
@@ -244,11 +258,13 @@ function App() {
         // Update Firebase if metadata was added
         if (needsUpdate) {
           update(ref(database, `travelPlans/${planId}`), {
-            userMetadata: updatedMetadata
+            userMetadata: updatedMetadata,
           });
         }
 
-        setTimeout(() => { isUpdatingFromFirebase.current = false; }, 0);
+        setTimeout(() => {
+          isUpdatingFromFirebase.current = false;
+        }, 0);
       }
     });
 
@@ -270,12 +286,16 @@ function App() {
   // Auto-fill flight dates when travel dates change
   useEffect(() => {
     if (startDate && endDate) {
-      setNewFlight(prev => ({
+      setNewFlight((prev) => ({
         ...prev,
-        outboundDeparture: startDate + 'T' + (prev.outboundDeparture?.split('T')[1] || ''),
-        outboundArrival: startDate + 'T' + (prev.outboundArrival?.split('T')[1] || ''),
-        returnDeparture: endDate + 'T' + (prev.returnDeparture?.split('T')[1] || ''),
-        returnArrival: endDate + 'T' + (prev.returnArrival?.split('T')[1] || '')
+        outboundDeparture:
+          startDate + "T" + (prev.outboundDeparture?.split("T")[1] || ""),
+        outboundArrival:
+          startDate + "T" + (prev.outboundArrival?.split("T")[1] || ""),
+        returnDeparture:
+          endDate + "T" + (prev.returnDeparture?.split("T")[1] || ""),
+        returnArrival:
+          endDate + "T" + (prev.returnArrival?.split("T")[1] || ""),
       }));
     }
   }, [startDate, endDate]);
@@ -383,7 +403,10 @@ function App() {
     const updatedFlight = { ...confirmedFlight, [field]: value };
 
     setConfirmedFlight(updatedFlight);
-    update(ref(database, `travelPlans/${planId}/confirmedFlight`), updatedFlight);
+    update(
+      ref(database, `travelPlans/${planId}/confirmedFlight`),
+      updatedFlight
+    );
   };
 
   // Flight voting and comments
@@ -432,7 +455,9 @@ function App() {
     const flight = flights.find((f) => f.id === flightId);
     const comments = flight?.comments || [];
 
-    const updatedComments = comments.filter((c) => !(c.id === commentId && c.userId === user.uid));
+    const updatedComments = comments.filter(
+      (c) => !(c.id === commentId && c.userId === user.uid)
+    );
 
     update(ref(database, `travelPlans/${planId}/flights/${flightId}`), {
       comments: updatedComments,
@@ -440,19 +465,19 @@ function App() {
   };
 
   // Accommodation confirmation functions
-const saveConfirmedAccommodationDetails = (details = {}) => {
-  if (!planId) return;
+  const saveConfirmedAccommodationDetails = (details = {}) => {
+    if (!planId) return;
 
-  const base = confirmedAccommodation || createEmptyAccommodationDetails();
-  const template = createEmptyAccommodationDetails();
-  const sanitizeRoutes = (routesSource) => {
-    if (!Array.isArray(routesSource)) {
-      return base.routes || [];
-    }
-    return routesSource.map((route, index) => {
-      const transferSegments = Array.isArray(route.transferSegments)
-        ? route.transferSegments
-        : Array.isArray(route.transferStations)
+    const base = confirmedAccommodation || createEmptyAccommodationDetails();
+    const template = createEmptyAccommodationDetails();
+    const sanitizeRoutes = (routesSource) => {
+      if (!Array.isArray(routesSource)) {
+        return base.routes || [];
+      }
+      return routesSource.map((route, index) => {
+        const transferSegments = Array.isArray(route.transferSegments)
+          ? route.transferSegments
+          : Array.isArray(route.transferStations)
           ? route.transferStations.map((stationValue, transferIndex) => ({
               id: `transfer-${Date.now()}-${index}-${transferIndex}`,
               line: "",
@@ -460,27 +485,41 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
             }))
           : [];
 
-      return {
-        id: route.id || `route-${Date.now()}-${index}`,
-        destinationName: route.destinationName || "",
-        transportMode: route.transportMode || "",
-        line: route.line || route.subwayLine || "",
-        station: route.station || "",
-        requiresTransfer: Boolean(route.requiresTransfer),
-        transferSegments: transferSegments.map((segment, segmentIndex) => ({
-          id: segment.id || `transfer-${Date.now()}-${index}-${segmentIndex}`,
-          line: segment.line || "",
-          station: segment.station || "",
-        })),
-      };
-    });
-  };
+        return {
+          id: route.id || `route-${Date.now()}-${index}`,
+          destinationName: route.destinationName || "",
+          transportMode: route.transportMode || "",
+          line: route.line || route.subwayLine || "",
+          station: route.station || "",
+          requiresTransfer: Boolean(route.requiresTransfer),
+          transferSegments: transferSegments.map((segment, segmentIndex) => ({
+            id: segment.id || `transfer-${Date.now()}-${index}-${segmentIndex}`,
+            line: segment.line || "",
+            station: segment.station || "",
+          })),
+        };
+      });
+    };
+
+    const sanitizeArrivals = (arrivalsSource) => {
+      if (!Array.isArray(arrivalsSource)) {
+        return base.arrivalMethods || [];
+      }
+      return arrivalsSource.map((item, index) => ({
+        id: item.id || `arrival-${Date.now()}-${index}`,
+        mode: item.mode || "subway",
+        line: item.line || "",
+        station: item.station || "",
+        fare: item.fare || "",
+      }));
+    };
 
     const merged = {
       ...template,
       ...base,
       ...details,
       routes: sanitizeRoutes(details.routes),
+      arrivalMethods: sanitizeArrivals(details.arrivalMethods),
     };
 
     setConfirmedAccommodation(merged);
@@ -516,7 +555,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
         timestamp: Date.now(),
       };
 
-      set(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`), itemData);
+      set(
+        ref(database, `travelPlans/${planId}/preTripItems/${itemId}`),
+        itemData
+      );
 
       setNewPreTripItem({
         itemName: "",
@@ -535,7 +577,7 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
     const isCurrentlyChecked = checkedBy.includes(userId);
 
     const updatedCheckedBy = isCurrentlyChecked
-      ? checkedBy.filter(uid => uid !== userId)
+      ? checkedBy.filter((uid) => uid !== userId)
       : [...checkedBy, userId];
 
     update(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`), {
@@ -544,15 +586,15 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
   };
 
   const deletePreTripItem = (itemId) => {
-    if (!planId || !user) return;
-
-    const item = preTripItems[itemId];
-    if (!item || item.addedBy !== user.uid) {
-      alert('只有物品建立者可以刪除此物品');
-      return;
-    }
+    if (!planId) return;
 
     remove(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`));
+  };
+
+  const updatePreTripItem = (itemId, updates) => {
+    if (!planId) return;
+
+    update(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`), updates);
   };
 
   // Option management functions
@@ -563,17 +605,23 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
     const optionWithMeta = {
       ...optionData,
       addedBy: user.uid,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
-    update(ref(database, `travelPlans/${planId}/preTripItems/${itemId}/options/${optionId}`), optionWithMeta);
+    update(
+      ref(
+        database,
+        `travelPlans/${planId}/preTripItems/${itemId}/options/${optionId}`
+      ),
+      optionWithMeta
+    );
   };
 
   const selectOption = (itemId, optionId) => {
     if (!planId) return;
 
     update(ref(database, `travelPlans/${planId}/preTripItems/${itemId}`), {
-      selectedOption: optionId
+      selectedOption: optionId,
     });
   };
 
@@ -584,11 +632,16 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
     const option = item?.options?.[optionId];
 
     if (!option || option.addedBy !== user.uid) {
-      alert('只有方案建立者可以刪除此方案');
+      alert("只有方案建立者可以刪除此方案");
       return;
     }
 
-    remove(ref(database, `travelPlans/${planId}/preTripItems/${itemId}/options/${optionId}`));
+    remove(
+      ref(
+        database,
+        `travelPlans/${planId}/preTripItems/${itemId}/options/${optionId}`
+      )
+    );
   };
 
   // Shopping list functions
@@ -604,7 +657,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
       timestamp: Date.now(),
     };
 
-    set(ref(database, `travelPlans/${planId}/shoppingListItems/${itemId}`), itemData);
+    set(
+      ref(database, `travelPlans/${planId}/shoppingListItems/${itemId}`),
+      itemData
+    );
 
     setNewShoppingItem({
       itemName: "",
@@ -625,15 +681,13 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
   };
 
   const deleteShoppingItem = (itemId) => {
-    if (!planId || !user) return;
-
-    const item = shoppingListItems[itemId];
-    if (!item || item.addedBy !== user.uid) {
-      alert('只有物品建立者可以刪除此物品');
-      return;
-    }
-
+    if (!planId) return;
     remove(ref(database, `travelPlans/${planId}/shoppingListItems/${itemId}`));
+  };
+
+  const updateShoppingItem = (itemId, updates) => {
+    if (!planId) return;
+    update(ref(database, `travelPlans/${planId}/shoppingListItems/${itemId}`), updates);
   };
 
   // Daily plans with locations
@@ -663,7 +717,7 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
     setSkippedDays(newSkippedDays);
     if (planId) {
       update(ref(database, `travelPlans/${planId}`), {
-        skippedDays: newSkippedDays
+        skippedDays: newSkippedDays,
       });
     }
   };
@@ -685,15 +739,30 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
     const locationsArray = Array.isArray(currentPlan.locations)
       ? currentPlan.locations
       : Object.values(currentPlan.locations || {});
-    const newLocations = locationsArray.filter((_, idx) => idx !== locationIndex);
+    const newLocations = locationsArray.filter(
+      (_, idx) => idx !== locationIndex
+    );
     updateDayPlan(day, { ...currentPlan, locations: newLocations });
+  };
+
+  const updateLocationInDay = (day, locationIndex, updatedLocation) => {
+    const currentPlan = dailyPlans[day];
+    if (!currentPlan || !currentPlan.locations) return;
+    const locationsArray = Array.isArray(currentPlan.locations)
+      ? [...currentPlan.locations]
+      : [...Object.values(currentPlan.locations || {})];
+    if (!locationsArray[locationIndex]) return;
+    locationsArray[locationIndex] = {
+      ...locationsArray[locationIndex],
+      ...updatedLocation,
+    };
+    updateDayPlan(day, { ...currentPlan, locations: locationsArray });
   };
 
   const updateDayTitle = (day, title) => {
     const currentPlan = dailyPlans[day] || { locations: [] };
     updateDayPlan(day, { ...currentPlan, title: title.trim() });
   };
-
 
   const calculateDays = async () => {
     const days = calculateDaysFromDates(startDate, endDate);
@@ -718,12 +787,12 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
       setSkippedDays({});
 
       // Auto-fill flight dates from travel dates
-      setNewFlight(prev => ({
+      setNewFlight((prev) => ({
         ...prev,
-        outboundDeparture: startDate ? startDate + 'T' : '',
-        outboundArrival: startDate ? startDate + 'T' : '',
-        returnDeparture: endDate ? endDate + 'T' : '',
-        returnArrival: endDate ? endDate + 'T' : ''
+        outboundDeparture: startDate ? startDate + "T" : "",
+        outboundArrival: startDate ? startDate + "T" : "",
+        returnDeparture: endDate ? endDate + "T" : "",
+        returnArrival: endDate ? endDate + "T" : "",
       }));
 
       // Update Firebase with proper data structure
@@ -756,7 +825,7 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
 
     if (userSnapshot.exists() && userSnapshot.val().planId) {
       const confirmOverwrite = window.confirm(
-        '您已經有一個旅行計劃。\n創建新計劃將覆蓋現有計劃。\n\n確定要繼續嗎？'
+        "您已經有一個旅行計劃。\n創建新計劃將覆蓋現有計劃。\n\n確定要繼續嗎？"
       );
 
       if (!confirmOverwrite) {
@@ -777,7 +846,7 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
         [user.uid]: {
           email: user.email,
           displayName: user.displayName || user.email,
-        }
+        },
       },
       startDate: "",
       endDate: "",
@@ -832,8 +901,14 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
 
       // Step 2: Grant temporary read access
       console.log("Step 2: Granting temporary access...");
-      console.log("inviteAuth path:", `inviteAuth/${invite.planId}/${user.uid}`);
-      const inviteAuthRef = ref(database, `inviteAuth/${invite.planId}/${user.uid}`);
+      console.log(
+        "inviteAuth path:",
+        `inviteAuth/${invite.planId}/${user.uid}`
+      );
+      const inviteAuthRef = ref(
+        database,
+        `inviteAuth/${invite.planId}/${user.uid}`
+      );
       await set(inviteAuthRef, { grantedAt: Date.now() });
       console.log("Access granted successfully");
 
@@ -869,18 +944,18 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
         [user.uid]: {
           email: user.email,
           displayName: user.displayName || user.email,
-        }
+        },
       };
       console.log("Updated users:", updatedUsers);
       await update(planRef, {
         users: updatedUsers,
-        userMetadata: updatedUserMetadata
+        userMetadata: updatedUserMetadata,
       });
       console.log("Plan users and metadata updated");
 
       await set(ref(database, `users/${user.uid}`), {
         planId: invite.planId,
-        joinedAt: Date.now()
+        joinedAt: Date.now(),
       });
       console.log("User data updated");
 
@@ -897,7 +972,6 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
       setTimeout(() => {
         alert("Successfully joined the plan!");
       }, 100);
-
     } catch (error) {
       console.error("=== ERROR JOINING PLAN ===");
       console.error("Error message:", error.message);
@@ -911,12 +985,12 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
     if (!planId) return;
     const code = generateSecureInviteCode();
     const inviteRef = ref(database, `invites/${code}`);
-    const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
     set(inviteRef, {
       planId,
       status: "pending",
       timestamp: Date.now(),
-      expiresAt
+      expiresAt,
     });
     setGeneratedInviteCode(code);
     setShowInviteModal(true);
@@ -958,7 +1032,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
 
       // Step 2: Grant temporary read access
       console.log("Step 2: Granting temporary access...");
-      const inviteAuthRef = ref(database, `inviteAuth/${invite.planId}/${user.uid}`);
+      const inviteAuthRef = ref(
+        database,
+        `inviteAuth/${invite.planId}/${user.uid}`
+      );
       await set(inviteAuthRef, { grantedAt: Date.now() });
       console.log("Access granted successfully");
 
@@ -992,17 +1069,17 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
         [user.uid]: {
           email: user.email,
           displayName: user.displayName || user.email,
-        }
+        },
       };
       await update(planRef, {
         users: updatedUsers,
-        userMetadata: updatedUserMetadata
+        userMetadata: updatedUserMetadata,
       });
       console.log("Plan users and metadata updated");
 
       await set(ref(database, `users/${user.uid}`), {
         planId: invite.planId,
-        joinedAt: Date.now()
+        joinedAt: Date.now(),
       });
       console.log("User data updated");
 
@@ -1015,7 +1092,6 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
       setShowJoinModal(false);
       setInviteCode("");
       alert("Joined the shared plan successfully!");
-
     } catch (error) {
       console.error("Error joining plan:", error);
       console.error("Error code:", error.code);
@@ -1043,7 +1119,6 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
 
     return (
       <div className="tab-content">
-        <h2>旅行時間</h2>
         <div className="form-group">
           <label>開始日期:</label>
           <input
@@ -1066,7 +1141,7 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
           disabled={!hasDateChanged}
           style={{
             opacity: hasDateChanged ? 1 : 0.5,
-            cursor: hasDateChanged ? 'pointer' : 'not-allowed'
+            cursor: hasDateChanged ? "pointer" : "not-allowed",
           }}
         >
           計算天數
@@ -1077,16 +1152,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
   };
 
   const Tab2 = () => {
-    const airlineOptions = [
-      "長榮航空",
-      "中華航空",
-      "星宇航空",
-      "全日航"
-    ];
+    const airlineOptions = ["長榮航空", "中華航空", "星宇航空", "全日航"];
 
     return (
       <div className="tab-content">
-        <h2>機票確認</h2>
         <div className="flight-form">
           <div className="flight-form-section">
             <div className="flight-form-header">
@@ -1099,7 +1168,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                   type="datetime-local"
                   value={newFlight.outboundDeparture}
                   onChange={(e) =>
-                    setNewFlight({ ...newFlight, outboundDeparture: e.target.value })
+                    setNewFlight({
+                      ...newFlight,
+                      outboundDeparture: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -1109,7 +1181,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                   type="datetime-local"
                   value={newFlight.outboundArrival}
                   onChange={(e) =>
-                    setNewFlight({ ...newFlight, outboundArrival: e.target.value })
+                    setNewFlight({
+                      ...newFlight,
+                      outboundArrival: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -1120,7 +1195,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                 placeholder="例如：預計提前2小時到機場、搭乘捷運前往..."
                 value={newFlight.outboundComment}
                 onChange={(e) =>
-                  setNewFlight({ ...newFlight, outboundComment: e.target.value })
+                  setNewFlight({
+                    ...newFlight,
+                    outboundComment: e.target.value,
+                  })
                 }
                 maxLength="500"
                 rows="2"
@@ -1139,7 +1217,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                   type="datetime-local"
                   value={newFlight.returnDeparture}
                   onChange={(e) =>
-                    setNewFlight({ ...newFlight, returnDeparture: e.target.value })
+                    setNewFlight({
+                      ...newFlight,
+                      returnDeparture: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -1149,7 +1230,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                   type="datetime-local"
                   value={newFlight.returnArrival}
                   onChange={(e) =>
-                    setNewFlight({ ...newFlight, returnArrival: e.target.value })
+                    setNewFlight({
+                      ...newFlight,
+                      returnArrival: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -1171,7 +1255,9 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
           <div className="flight-form-footer">
             <CustomDropdown
               value={newFlight.airline}
-              onChange={(value) => setNewFlight({ ...newFlight, airline: value })}
+              onChange={(value) =>
+                setNewFlight({ ...newFlight, airline: value })
+              }
               options={airlineOptions}
               placeholder="航空公司"
             />
@@ -1213,7 +1299,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                             type="datetime-local"
                             value={editedFlight.outboundDeparture}
                             onChange={(e) =>
-                              updateEditedFlight("outboundDeparture", e.target.value)
+                              updateEditedFlight(
+                                "outboundDeparture",
+                                e.target.value
+                              )
                             }
                           />
                         </div>
@@ -1223,7 +1312,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                             type="datetime-local"
                             value={editedFlight.outboundArrival}
                             onChange={(e) =>
-                              updateEditedFlight("outboundArrival", e.target.value)
+                              updateEditedFlight(
+                                "outboundArrival",
+                                e.target.value
+                              )
                             }
                           />
                         </div>
@@ -1234,7 +1326,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                           placeholder="例如：預計提前2小時到機場、搭乘捷運前往..."
                           value={editedFlight.outboundComment || ""}
                           onChange={(e) =>
-                            updateEditedFlight("outboundComment", e.target.value)
+                            updateEditedFlight(
+                              "outboundComment",
+                              e.target.value
+                            )
                           }
                           maxLength="500"
                           rows="2"
@@ -1250,7 +1345,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                             type="datetime-local"
                             value={editedFlight.returnDeparture}
                             onChange={(e) =>
-                              updateEditedFlight("returnDeparture", e.target.value)
+                              updateEditedFlight(
+                                "returnDeparture",
+                                e.target.value
+                              )
                             }
                           />
                         </div>
@@ -1260,7 +1358,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                             type="datetime-local"
                             value={editedFlight.returnArrival}
                             onChange={(e) =>
-                              updateEditedFlight("returnArrival", e.target.value)
+                              updateEditedFlight(
+                                "returnArrival",
+                                e.target.value
+                              )
                             }
                           />
                         </div>
@@ -1311,16 +1412,25 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                       <div className="flight-times">
                         <div className="time-display">
                           <span className="time-label">起飛</span>
-                          <span className="time-value">{flight.outboundDeparture}</span>
+                          <span className="time-value">
+                            {flight.outboundDeparture}
+                          </span>
                         </div>
                         <span className="arrow">→</span>
                         <div className="time-display">
                           <span className="time-label">抵達</span>
-                          <span className="time-value">{flight.outboundArrival}</span>
+                          <span className="time-value">
+                            {flight.outboundArrival}
+                          </span>
                         </div>
                       </div>
                       {flight.outboundComment && (
-                        <div className="flight-comment outbound" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(flight.outboundComment) }} />
+                        <div
+                          className="flight-comment outbound"
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(flight.outboundComment),
+                          }}
+                        />
                       )}
                     </div>
                     <div className="flight-section">
@@ -1328,16 +1438,25 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                       <div className="flight-times">
                         <div className="time-display">
                           <span className="time-label">起飛</span>
-                          <span className="time-value">{flight.returnDeparture}</span>
+                          <span className="time-value">
+                            {flight.returnDeparture}
+                          </span>
                         </div>
                         <span className="arrow">→</span>
                         <div className="time-display">
                           <span className="time-label">抵達</span>
-                          <span className="time-value">{flight.returnArrival}</span>
+                          <span className="time-value">
+                            {flight.returnArrival}
+                          </span>
                         </div>
                       </div>
                       {flight.returnComment && (
-                        <div className="flight-comment return" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(flight.returnComment) }} />
+                        <div
+                          className="flight-comment return"
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(flight.returnComment),
+                          }}
+                        />
                       )}
                     </div>
                   </div>
@@ -1348,27 +1467,28 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                     >
                       編輯
                     </button>
-                    <button
-                      onClick={() => deleteFlight(flight.id)}
-                      className="btn-remove"
-                    >
-                      刪除
-                    </button>
+                    <DeleteIcon onClick={() => deleteFlight(flight.id)} />
                   </div>
                 </>
               )}
             </div>
           ))}
-          {flights.length === 0 && (
-            <p className="empty-state">無航班資料</p>
-          )}
+          {flights.length === 0 && <p className="empty-state">無航班資料</p>}
         </div>
       </div>
     );
   };
 
   const Tab3 = () => {
-    const transportationOptions = ["山手線", "中央線", "京濱東北線", "JR線", "地鐵", "步行", "巴士"];
+    const transportationOptions = [
+      "山手線",
+      "中央線",
+      "京濱東北線",
+      "JR線",
+      "地鐵",
+      "步行",
+      "巴士",
+    ];
     const timePeriodOptions = ["早上", "中午", "下午", "晚上"];
     const categoryOptions = ["必去景點", "必吃美食", "購物", "住宿", "其他"];
 
@@ -1378,6 +1498,112 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
       const [timePeriod, setTimePeriod] = useState("");
       const [category, setCategory] = useState("");
       const [notes, setNotes] = useState("");
+      const [routes, setRoutes] = useState([]);
+      const [routeTransferInputs, setRouteTransferInputs] = useState({});
+      const routeOptions = ["地鐵", "巴士", "計程車", "其他"];
+
+      const MAX_LOCATION_ROUTES = 3;
+      const createEmptyLocationRoute = () => ({
+        id: `loc-route-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        destinationName: "",
+        transportMode: "",
+        line: "",
+        station: "",
+        requiresTransfer: false,
+        transferSegments: [],
+      });
+
+      const addLocationRoute = () => {
+        if (routes.length >= MAX_LOCATION_ROUTES) return;
+        setRoutes((prev) => [...prev, createEmptyLocationRoute()]);
+      };
+
+      const updateLocationRoute = (routeId, field, value) => {
+        setRoutes((prev) =>
+          prev.map((route) => {
+            if (route.id !== routeId) return route;
+            const updatedRoute = { ...route, [field]: value };
+            if (field === "requiresTransfer" && !value) {
+              updatedRoute.transferSegments = [];
+              setRouteTransferInputs((prevInputs) => {
+                const copy = { ...prevInputs };
+                delete copy[routeId];
+                return copy;
+              });
+            }
+            return updatedRoute;
+          })
+        );
+      };
+
+      const removeLocationRoute = (routeId) => {
+        setRoutes((prev) => prev.filter((route) => route.id !== routeId));
+        setRouteTransferInputs((prev) => {
+          const updated = { ...prev };
+          delete updated[routeId];
+          return updated;
+        });
+      };
+
+      const handleRouteTransferInputChange = (routeId, field, value) => {
+        setRouteTransferInputs((prev) => ({
+          ...prev,
+          [routeId]: {
+            ...(prev[routeId] || { line: "", station: "" }),
+            [field]: value,
+          },
+        }));
+      };
+
+      const addLocationTransferSegment = (routeId) => {
+        const pending = routeTransferInputs[routeId] || {
+          line: "",
+          station: "",
+        };
+        const cleanedLine = pending.line.trim();
+        const cleanedStation = pending.station.trim();
+        if (!cleanedLine && !cleanedStation) return;
+
+        setRoutes((prev) =>
+          prev.map((route) =>
+            route.id === routeId
+              ? {
+                  ...route,
+                  transferSegments: [
+                    ...(route.transferSegments || []),
+                    {
+                      id: `transfer-${Date.now()}-${Math.random()
+                        .toString(36)
+                        .slice(2, 7)}`,
+                      line: cleanedLine,
+                      station: cleanedStation,
+                    },
+                  ],
+                }
+              : route
+          )
+        );
+
+        setRouteTransferInputs((prev) => ({
+          ...prev,
+          [routeId]: { line: "", station: "" },
+        }));
+      };
+
+      const removeLocationTransferSegment = (routeId, segmentIndex) => {
+        setRoutes((prev) =>
+          prev.map((route) =>
+            route.id === routeId
+              ? {
+                  ...route,
+                  transferSegments: (route.transferSegments || []).filter(
+                    (_, idx) => idx !== segmentIndex
+                  ),
+                }
+              : route
+          )
+        );
+      };
 
       const handleAddLocation = () => {
         if (!locationName || !transportation || !timePeriod || !category) {
@@ -1385,19 +1611,27 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
           return;
         }
 
+        const clonedRoutes = routes.map((route) => ({
+          ...route,
+          transferSegments: Array.isArray(route.transferSegments)
+            ? route.transferSegments.map((segment) => ({ ...segment }))
+            : [],
+        }));
+
         const newLocation = {
           name: locationName,
           transportation,
           timePeriod,
           category,
           notes,
+          routes: clonedRoutes,
           createdBy: {
             uid: user.uid,
             name: user.displayName,
             email: user.email,
-            photo: user.photoURL
+            photo: user.photoURL,
           },
-          createdAt: Date.now()
+          createdAt: Date.now(),
         };
 
         addLocationToDay(day, newLocation);
@@ -1408,6 +1642,8 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
         setTimePeriod("");
         setCategory("");
         setNotes("");
+        setRoutes([]);
+        setRouteTransferInputs({});
       };
 
       return (
@@ -1451,6 +1687,175 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
               className="location-input"
             />
           </div>
+          <div className="location-routes-wrapper">
+            <div className="arrival-methods-header">
+              <label>路線規劃</label>
+              <p>最多可新增 3 條路線。</p>
+            </div>
+            {routes.length === 0 && (
+              <div className="empty-route">
+                <p>尚未新增任何路線</p>
+                <p className="empty-route-hint">例如：從住宿到機場的交通方式</p>
+              </div>
+            )}
+            <div className="route-list">
+              {routes.map((route) => (
+                <div key={route.id} className="route-card">
+                  <div className="route-card-header">
+                    <h4>{route.destinationName || "目的地"}</h4>
+                    <DeleteIcon onClick={() => removeLocationRoute(route.id)} />
+                  </div>
+                  <div className="form-grid form-grid-two">
+                    <div className="input-group">
+                      <label>目的地 *</label>
+                      <input
+                        type="text"
+                        value={route.destinationName}
+                        onChange={(e) =>
+                          updateLocationRoute(
+                            route.id,
+                            "destinationName",
+                            e.target.value
+                          )
+                        }
+                        placeholder="例如：關西機場"
+                        required
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label>交通工具 *</label>
+                      <CustomDropdown
+                        value={route.transportMode}
+                        onChange={(option) =>
+                          updateLocationRoute(route.id, "transportMode", option)
+                        }
+                        options={routeOptions}
+                        placeholder="選擇交通方式"
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label>線別</label>
+                      <input
+                        type="text"
+                        value={route.line}
+                        onChange={(e) =>
+                          updateLocationRoute(route.id, "line", e.target.value)
+                        }
+                        placeholder="例如：京成本線"
+                      />
+                    </div>
+                    <div className="input-group station-with-toggle">
+                      <label>搭乘站</label>
+                      <input
+                        type="text"
+                        value={route.station}
+                        onChange={(e) =>
+                          updateLocationRoute(
+                            route.id,
+                            "station",
+                            e.target.value
+                          )
+                        }
+                        placeholder="例如：青砥站"
+                      />
+                      <div className="toggle-inline-row toggle-under-station">
+                        <span>是否需轉乘</span>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={route.requiresTransfer || false}
+                            onChange={(e) =>
+                              updateLocationRoute(
+                                route.id,
+                                "requiresTransfer",
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <span className="slider" />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  {route.requiresTransfer && (
+                    <div className="transfer-section">
+                      <label>轉乘線別與站名</label>
+                      <div className="transfer-input-row">
+                        <input
+                          type="text"
+                          value={routeTransferInputs[route.id]?.line || ""}
+                          onChange={(e) =>
+                            handleRouteTransferInputChange(
+                              route.id,
+                              "line",
+                              e.target.value
+                            )
+                          }
+                          placeholder="轉乘線"
+                        />
+                        <input
+                          type="text"
+                          value={routeTransferInputs[route.id]?.station || ""}
+                          onChange={(e) =>
+                            handleRouteTransferInputChange(
+                              route.id,
+                              "station",
+                              e.target.value
+                            )
+                          }
+                          placeholder="轉乘站"
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-small"
+                          onClick={() => addLocationTransferSegment(route.id)}
+                        >
+                          新增
+                        </button>
+                      </div>
+                      {route.transferSegments &&
+                        route.transferSegments.length > 0 && (
+                          <div className="transfer-chips">
+                            {route.transferSegments.map((segment, index) => (
+                              <span
+                                key={`${route.id}-segment-${index}`}
+                                className="transfer-chip"
+                              >
+                                {segment.line && (
+                                  <strong>{segment.line}</strong>
+                                )}{" "}
+                                {segment.station}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    removeLocationTransferSegment(
+                                      route.id,
+                                      index
+                                    )
+                                  }
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="route-add-action">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={addLocationRoute}
+                disabled={routes.length >= MAX_LOCATION_ROUTES}
+              >
+                + 新增路線
+              </button>
+            </div>
+          </div>
           <button onClick={handleAddLocation} className="btn btn-add-location">
             新增地點
           </button>
@@ -1462,7 +1867,12 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
       return (
         <div className="location-card">
           <div className="location-card-header">
-            <h4 className="location-name" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(location.name) }} />
+            <h4
+              className="location-name"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(location.name),
+              }}
+            />
             <button
               onClick={() => removeLocationFromDay(day, index)}
               className="btn-delete-location"
@@ -1471,13 +1881,50 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
             </button>
           </div>
           <div className="location-tags">
-            <span className="tag tag-transportation">{location.transportation}</span>
+            <span className="tag tag-transportation">
+              {location.transportation}
+            </span>
             <span className="tag tag-time">{location.timePeriod}</span>
             <span className="tag tag-category">{location.category}</span>
           </div>
           {location.notes && (
             <div className="location-notes">
               <small>{location.notes}</small>
+            </div>
+          )}
+          {location.routes && location.routes.length > 0 && (
+            <div className="location-routes-summary">
+              <h5>路線規劃</h5>
+              <ul className="route-summary-list">
+                {location.routes.map((route, idx) => (
+                  <li key={`${route.id || idx}`} className="route-summary-item">
+                    <div className="route-summary-destination">
+                      {route.destinationName || `路線 ${idx + 1}`}
+                    </div>
+                    <div className="route-summary-meta">
+                      {route.transportMode && (
+                        <span>{route.transportMode}</span>
+                      )}
+                      {route.line && <span> · {route.line}</span>}
+                      {route.station && <span> · {route.station}</span>}
+                    </div>
+                    {route.requiresTransfer &&
+                      route.transferSegments &&
+                      route.transferSegments.length > 0 && (
+                        <div className="route-summary-transfer">
+                          轉乘：
+                          {route.transferSegments
+                            .map((segment) =>
+                              segment.line
+                                ? `${segment.line} ${segment.station}`
+                                : segment.station
+                            )
+                            .join(" → ")}
+                        </div>
+                      )}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
@@ -1517,12 +1964,21 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
             const isCompleted = skippedDays[day];
 
             return (
-              <div key={day} className={`day-accordion ${isCompleted ? 'completed' : ''}`}>
+              <div
+                key={day}
+                className={`day-accordion ${isCompleted ? "completed" : ""}`}
+              >
                 <div className="day-accordion-header">
                   <div
                     className="day-accordion-header-left"
                     onClick={() => toggleDayExpanded(day)}
-                    style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 'var(--space-md)', cursor: 'pointer' }}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "var(--space-md)",
+                      cursor: "pointer",
+                    }}
                   >
                     <h3>{day}</h3>
                     <span className="day-location-count">
@@ -1532,7 +1988,10 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                       {isExpanded ? "▲" : "▼"}
                     </span>
                   </div>
-                  <div className="day-complete-checkbox-container" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="day-complete-checkbox-container"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <input
                       type="checkbox"
                       checked={isCompleted || false}
@@ -1544,7 +2003,11 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                 </div>
                 {isExpanded && (
                   <div className="day-accordion-content">
-                    <LocationForm day={day} />
+                    <LocationForm
+                      day={day}
+                      onAddLocation={addLocationToDay}
+                      currentUser={user}
+                    />
                     <div className="locations-list">
                       {locations.map((location, index) => (
                         <LocationCard
@@ -1570,12 +2033,12 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
     );
   };
 
-
   const renderTabContent = () => {
     switch (currentTab) {
       case 1:
         return (
           <PreTripTab
+            activePreTripSubTab={activePreTripSubTab}
             planId={planId}
             startDate={startDate}
             endDate={endDate}
@@ -1613,6 +2076,7 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
             onAddPreTripItem={addPreTripItem}
             onToggleItemCheck={toggleItemCheck}
             onDeletePreTripItem={deletePreTripItem}
+            onUpdatePreTripItem={updatePreTripItem}
             onAddOption={addOption}
             onSelectOption={selectOption}
             onDeleteOption={deleteOption}
@@ -1631,6 +2095,7 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
             onToggleDayCompleted={toggleDayCompleted}
             onAddLocation={addLocationToDay}
             onRemoveLocation={removeLocationFromDay}
+            onUpdateLocation={updateLocationInDay}
             onUpdateDayTitle={updateDayTitle}
             startDate={startDate}
             shoppingListItems={shoppingListItems}
@@ -1639,6 +2104,8 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
             onAddShoppingItem={addShoppingItem}
             onToggleShoppingItemCheck={toggleShoppingItemCheck}
             onDeleteShoppingItem={deleteShoppingItem}
+            onUpdateShoppingItem={updateShoppingItem}
+            allUsers={planUsers}
             currentUser={user}
             userMetadata={userMetadata}
           />
@@ -1681,6 +2148,7 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
             onAddPreTripItem={addPreTripItem}
             onToggleItemCheck={toggleItemCheck}
             onDeletePreTripItem={deletePreTripItem}
+            onUpdatePreTripItem={updatePreTripItem}
             onAddOption={addOption}
             onSelectOption={selectOption}
             onDeleteOption={deleteOption}
@@ -1730,37 +2198,70 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
                 </div>
               )}
             </div>
-          </div>
-          <div className="auth-section">
-            <div>
-              <button onClick={generateInvite} className="btn btn-large">
-                分享計畫
-              </button>
-              <button onClick={() => setShowJoinModal(true)} className="btn btn-large">
-                加入計畫
-              </button>
-              <button onClick={logout} className="btn btn-icon-only" title="登出">
-                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
-                  <path fillRule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
-                </svg>
-              </button>
+            <div className="user-details">
+              {userEmail && <span className="user-meta">{userEmail}</span>}
             </div>
           </div>
+          <div className="header-actions">
+            <button onClick={generateInvite} className="btn btn-large">
+              分享計畫
+            </button>
+            <button
+              onClick={() => setShowJoinModal(true)}
+              className="btn btn-large"
+            >
+              加入計畫
+            </button>
+            <button onClick={logout} className="btn btn-icon-only" title="登出">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"
+                />
+                <path
+                  fillRule="evenodd"
+                  d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-        <nav className="tabs-nav">
-          {TABS.map((tab) => (
+      </header>
+      <nav className="tabs-nav app-tabs">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            className={`tab-btn ${currentTab === tab.id ? "active" : ""}`}
+            onClick={() => handleTabChange(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      {currentTab === 1 && (
+        <nav className="pre-trip-sub-tabs" aria-label="行前安排分類">
+          {PRETRIP_SUB_TABS.map((tab) => (
             <button
               key={tab.id}
-              className={`tab-btn ${currentTab === tab.id ? "active" : ""}`}
-              onClick={() => handleTabChange(tab.id)}
+              className={`pre-trip-sub-tab ${
+                activePreTripSubTab === tab.id ? "active" : ""
+              }`}
+              onClick={() => setActivePreTripSubTab(tab.id)}
             >
-              {tab.label}
+              <span className="desktop-label">{tab.label}</span>
+              <span className="mobile-label">{tab.mobileLabel}</span>
             </button>
           ))}
         </nav>
-        <main className="main-content">{renderTabContent()}</main>
-      </header>
+      )}
+
+      <main className="main-content">{renderTabContent()}</main>
 
       {/* Invite Code Modal */}
       {showInviteModal && (
@@ -1768,9 +2269,7 @@ const saveConfirmedAccommodationDetails = (details = {}) => {
           <div className="modal invite-modal">
             <h3>分享您的計畫</h3>
             <p>將此邀請碼分享給您的旅伴：</p>
-            <div className="invite-code-display">
-              {generatedInviteCode}
-            </div>
+            <div className="invite-code-display">{generatedInviteCode}</div>
             <div className="modal-buttons">
               <button onClick={copyInviteCode} className="btn">
                 複製代碼

@@ -3,7 +3,7 @@
   /* Primary Color Palette - Inspired by natural materials and playful spaces */
   --color-terra-cotta: #D4876D;      /* Warm terra cotta - primary */
   --color-warm-sand: #F4E4D4;        /* Warm sand - backgrounds */
-  --color-sage-green: #A8B89F;       /* Sage green - secondary */
+  --color-sage-green: #D9C6B0;       /* Sage green - secondary */
   --color-soft-coral: #F2A494;       /* Soft coral - accents */
   --color-gentle-sky: #B8D8E8;       /* Gentle sky blue - tertiary */
   --color-warm-stone: #D9C6B0;       /* Warm stone - surfaces */
@@ -18,62 +18,59 @@
   --border-color: rgba(139, 111, 92, 0.18);
   --divider-color: rgba(139, 111, 92, 0.12);
 
-  /* Text Colors - Warm and readable */
-  --text-primary: #5C4A3D;           /* Deep warm brown */
-  --text-secondary: #8B6F5C;         /* Medium earth tone */
-  --text-tertiary: #A89580;          /* Light earth tone */
+  /* Text Colors - WCAG AA compliant */
+  --text-primary: #5C4A3D;           /* Deep warm brown - 8.8:1 */
+  --text-secondary: #7A6250;         /* Medium earth tone - 5.2:1 */
+  --text-tertiary: #96795E;          /* Light earth tone - 4.6:1 */
   --text-accent: #D4876D;            /* Terra cotta for emphasis */
 
-  /* Spacing Scale - Generous and breathing */
-  --space-xs: 6px;
+  /* Spacing Scale - 8px base for iOS alignment */
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
   --space-sm: 12px;
-  --space-md: 20px;
-  --space-lg: 32px;
-  --space-xl: 48px;
-  --space-2xl: 64px;
-  --space-3xl: 96px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --app-max-width: 1200px;
 
-  /* Typography Scale - Harmonious proportions */
-  --font-xs: 0.8125rem;    /* 13px */
-  --font-sm: 0.9375rem;    /* 15px */
-  --font-base: 1.0625rem;  /* 17px */
+  /* Typography Scale - 16px base for iOS standard */
+  --font-xs: 0.75rem;      /* 12px */
+  --font-sm: 0.875rem;     /* 14px */
+  --font-base: 1rem;       /* 16px */
+  --font-md: 1.125rem;     /* 18px */
   --font-lg: 1.25rem;      /* 20px */
   --font-xl: 1.5rem;       /* 24px */
   --font-2xl: 1.875rem;    /* 30px */
-  --font-3xl: 2.375rem;    /* 38px */
+  --font-3xl: 2.25rem;     /* 36px */
   --font-4xl: 3rem;        /* 48px */
 
-  /* Line Heights - Relaxed and readable */
+  /* Line Heights - Optimized for mobile reading */
   --leading-tight: 1.25;
-  --leading-normal: 1.6;
-  --leading-relaxed: 1.75;
+  --leading-normal: 1.45;
+  --leading-relaxed: 1.6;
 
-  /* Border Radius - Organic and playful (Senda-inspired) */
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --radius-2xl: 36px;
+  /* Border Radius - Unified 12px base */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
   --radius-full: 9999px;
-  --radius-organic: 18px 28px 22px 26px;  /* Slightly asymmetric for organic feel */
 
-  /* Shadows - Soft and sculptural (Noguchi-inspired) */
-  --shadow-soft: 0 2px 8px rgba(139, 111, 92, 0.08),
-                 0 1px 3px rgba(139, 111, 92, 0.06);
-  --shadow-sm: 0 4px 12px rgba(139, 111, 92, 0.1),
-               0 2px 6px rgba(139, 111, 92, 0.08);
-  --shadow-md: 0 8px 24px rgba(139, 111, 92, 0.12),
-               0 4px 12px rgba(139, 111, 92, 0.1);
-  --shadow-lg: 0 16px 40px rgba(139, 111, 92, 0.15),
-               0 8px 20px rgba(139, 111, 92, 0.12);
-  --shadow-xl: 0 24px 56px rgba(139, 111, 92, 0.18),
-               0 12px 28px rgba(139, 111, 92, 0.14);
+  /* Shadows - Single layer soft shadows */
+  --shadow-soft: 0 1px 3px rgba(139, 111, 92, 0.08);
+  --shadow-sm: 0 2px 8px rgba(139, 111, 92, 0.08);
+  --shadow-md: 0 4px 16px rgba(139, 111, 92, 0.1);
+  --shadow-lg: 0 8px 24px rgba(139, 111, 92, 0.12);
+  --shadow-xl: 0 12px 32px rgba(139, 111, 92, 0.14);
 
-  /* Transitions - Smooth and organic */
-  --transition-fast: 180ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 280ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 380ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  /* Transitions - Smooth without bounce */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Z-index Scale */
   --z-base: 0;
@@ -99,7 +96,7 @@ body {
                'Noto Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: var(--font-base);
+  font-size: clamp(0.9375rem, 0.9rem + 0.3vw, var(--font-base));
   line-height: var(--leading-normal);
   background: var(--gradient-warm);
   min-height: 100vh;

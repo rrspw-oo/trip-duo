@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import ConfirmedAccommodationTicket from "./ConfirmedAccommodationTicket";
+import DeleteIcon from "../common/DeleteIcon";
 
 const ROUTE_TRANSPORT_OPTIONS = ["地鐵", "巴士", "計程車", "其他"];
+const PAYMENT_OPTIONS = [
+  { value: "paid", label: "已付款" },
+  { value: "half", label: "已付50%" },
+  { value: "unpaid", label: "未付款" },
+];
 
 const createEmptyFormState = () => ({
   name: "",
@@ -15,19 +21,17 @@ const createEmptyFormState = () => ({
   bookingDate: "",
   bookingCode: "",
   bookingUrl: "",
-  isPaid: false,
-  routes: [],
+  paymentStatus: "unpaid",
+  arrivalMethods: [],
   notes: "",
 });
 
-const createEmptyRoute = () => ({
-  id: `route-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-  destinationName: "",
-  transportMode: "",
+const createEmptyArrivalMethod = () => ({
+  id: `arrival-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  mode: "subway",
   line: "",
   station: "",
-  requiresTransfer: false,
-  transferSegments: [],
+  fare: "",
 });
 
 const normalizeAccommodation = (data) => {
@@ -42,29 +46,14 @@ const normalizeAccommodation = (data) => {
     ...data,
     subwayStation: fallbackStation,
     mapsUrl: data.mapsUrl || "",
-    routes: Array.isArray(data.routes)
-      ? data.routes.map((route) => ({
-          ...createEmptyRoute(),
-          ...route,
-          id: route.id || `route-${Math.random().toString(36).slice(2, 7)}`,
-          line: route.line || route.subwayLine || "",
-          transferSegments: Array.isArray(route.transferSegments)
-            ? route.transferSegments.map((segment) => ({
-                id:
-                  segment.id ||
-                  `transfer-${Math.random().toString(36).slice(2, 7)}`,
-                line: segment.line || "",
-                station: segment.station || "",
-              }))
-            : Array.isArray(route.transferStations)
-            ? route.transferStations.map((stationValue, index) => ({
-                id: `transfer-${Math.random()
-                  .toString(36)
-                  .slice(2, 7)}-${index}`,
-                line: "",
-                station: stationValue || "",
-              }))
-            : [],
+    paymentStatus:
+      data.paymentStatus ||
+      (data.isPaid ? "paid" : data.isPending ? "half" : "unpaid"),
+    arrivalMethods: Array.isArray(data.arrivalMethods)
+      ? data.arrivalMethods.map((method) => ({
+          ...createEmptyArrivalMethod(),
+          ...method,
+          id: method.id || `arrival-${Math.random().toString(36).slice(2, 7)}`,
         }))
       : [],
   };
@@ -77,14 +66,12 @@ const AccommodationTab = ({
 }) => {
   const [formData, setFormData] = useState(createEmptyFormState());
   const [isDirty, setIsDirty] = useState(false);
-  const [transferInputs, setTransferInputs] = useState({});
   const [isEditingView, setIsEditingView] = useState(true);
 
   useEffect(() => {
     const normalized = normalizeAccommodation(confirmedAccommodation);
     setFormData(normalized);
     setIsDirty(false);
-    setTransferInputs({});
     setIsEditingView(!confirmedAccommodation);
   }, [confirmedAccommodation]);
 
@@ -96,101 +83,30 @@ const AccommodationTab = ({
     setIsDirty(true);
   };
 
-  const addRoute = () => {
+  const addArrivalMethod = () => {
     setFormData((prev) => ({
       ...prev,
-      routes: [...prev.routes, createEmptyRoute()],
+      arrivalMethods: [...prev.arrivalMethods, createEmptyArrivalMethod()],
     }));
     setIsDirty(true);
   };
 
-  const updateRoute = (routeId, field, value) => {
+  const updateArrivalMethod = (arrivalId, field, value) => {
     setFormData((prev) => ({
       ...prev,
-      routes: prev.routes.map((route) =>
-        route.id === routeId ? { ...route, [field]: value } : route
+      arrivalMethods: prev.arrivalMethods.map((method) =>
+        method.id === arrivalId ? { ...method, [field]: value } : method
       ),
     }));
     setIsDirty(true);
   };
 
-  const removeRoute = (routeId) => {
+  const removeArrivalMethod = (arrivalId) => {
     setFormData((prev) => ({
       ...prev,
-      routes: prev.routes.filter((route) => route.id !== routeId),
-    }));
-    setTransferInputs((prev) => {
-      const updated = { ...prev };
-      delete updated[routeId];
-      return updated;
-    });
-    setIsDirty(true);
-  };
-
-  const handleTransferInputChange = (routeId, field, value) => {
-    setTransferInputs((prev) => ({
-      ...prev,
-      [routeId]: {
-        ...(prev[routeId] || { line: "", station: "" }),
-        [field]: value,
-      },
-    }));
-  };
-
-  const addTransferSegment = (routeId) => {
-    const pending = transferInputs[routeId] || { line: "", station: "" };
-    const cleanedLine = pending.line.trim();
-    const cleanedStation = pending.station.trim();
-    if (!cleanedLine && !cleanedStation) return;
-
-    setFormData((prev) => ({
-      ...prev,
-      routes: prev.routes.map((route) =>
-        route.id === routeId
-          ? {
-              ...route,
-              transferSegments: [
-                ...(route.transferSegments || []),
-                {
-                  id: `transfer-${Date.now()}-${Math.random()
-                    .toString(36)
-                    .slice(2, 7)}`,
-                  line: cleanedLine,
-                  station: cleanedStation,
-                },
-              ],
-            }
-          : route
-      ),
-    }));
-    setTransferInputs((prev) => ({
-      ...prev,
-      [routeId]: { line: "", station: "" },
+      arrivalMethods: prev.arrivalMethods.filter((method) => method.id !== arrivalId),
     }));
     setIsDirty(true);
-  };
-
-  const removeTransferSegment = (routeId, segmentIndex) => {
-    setFormData((prev) => ({
-      ...prev,
-      routes: prev.routes.map((route) =>
-        route.id === routeId
-          ? {
-              ...route,
-              transferSegments: (route.transferSegments || []).filter(
-                (_, index) => index !== segmentIndex
-              ),
-            }
-          : route
-      ),
-    }));
-    setIsDirty(true);
-  };
-
-  const handleReset = () => {
-    setFormData(normalizeAccommodation(confirmedAccommodation));
-    setTransferInputs({});
-    setIsDirty(false);
   };
 
   const handleSave = () => {
@@ -208,7 +124,6 @@ const AccommodationTab = ({
     ) {
       onClearConfirmedAccommodation();
       setFormData(createEmptyFormState());
-      setTransferInputs({});
       setIsDirty(false);
       setIsEditingView(true);
     }
@@ -216,16 +131,55 @@ const AccommodationTab = ({
 
   const handleStartEdit = () => {
     setFormData(normalizeAccommodation(confirmedAccommodation));
-    setTransferInputs({});
     setIsDirty(false);
     setIsEditingView(true);
   };
 
   const handleCancelEdit = () => {
-    setFormData(normalizeAccommodation(confirmedAccommodation));
-    setTransferInputs({});
+    if (confirmedAccommodation) {
+      setFormData(normalizeAccommodation(confirmedAccommodation));
+      setIsEditingView(false);
+    } else {
+      setFormData(createEmptyFormState());
+      setIsEditingView(true);
+    }
     setIsDirty(false);
-    setIsEditingView(false);
+  };
+
+  const handlePaymentStatusSelect = (status) => {
+    setFormData((prev) => ({
+      ...prev,
+      paymentStatus: status,
+    }));
+    setIsDirty(true);
+  };
+
+  const getPaymentStatusLabel = (status) => {
+    switch (status) {
+      case "paid":
+        return "已付款";
+      case "half":
+        return "已付50%";
+      default:
+        return "尚未付款";
+    }
+  };
+
+  const formatDisplayDate = (value, includeTime = false) => {
+    if (!value) return "—";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return includeTime ? value : value.replace(/-/g, "/");
+    }
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, "0");
+    const day = String(parsed.getDate()).padStart(2, "0");
+    if (!includeTime) {
+      return `${year}/${month}/${day}`;
+    }
+    const hours = String(parsed.getHours()).padStart(2, "0");
+    const minutes = String(parsed.getMinutes()).padStart(2, "0");
+    return `${year}/${month}/${day} ${hours}:${minutes}`;
   };
 
   const isFormValid = Boolean(
@@ -326,177 +280,80 @@ const AccommodationTab = ({
             />
           </div>
         </div>
-      </section>
 
-      <section className="accommodation-section">
-        <div className="section-heading">
-          <h3>路線規劃</h3>
-        </div>
-        {formData.routes.length === 0 && (
-          <div className="empty-route">
-            <p>尚未新增任何目的地</p>
-            <p className="empty-route-hint">
-              例如：到機場、到某個景點的交通方式
-            </p>
+        <div className="arrival-methods-wrapper">
+          <div className="arrival-methods-header">
+            <label>抵達方式</label>
           </div>
-        )}
-        <div className="route-list">
-          {formData.routes.map((route) => (
-            <div key={route.id} className="route-card">
-              <div className="route-card-header">
-                <h4>{route.destinationName || "目的地"}</h4>
-                <button
-                  type="button"
-                  className="btn-remove btn-small"
-                  onClick={() => removeRoute(route.id)}
-                >
-                  刪除
-                </button>
-              </div>
-              <div className="form-grid form-grid-two">
-                <div className="input-group">
-                  <label>目的地 *</label>
-                  <input
-                    type="text"
-                    value={route.destinationName}
-                    onChange={(e) =>
-                      updateRoute(route.id, "destinationName", e.target.value)
-                    }
-                    placeholder="例如：關西機場"
-                    required
-                  />
-                </div>
-                <div className="input-group">
-                  <label>交通工具 *</label>
-                  <select
-                    value={route.transportMode}
-                    onChange={(e) =>
-                      updateRoute(route.id, "transportMode", e.target.value)
-                    }
-                    required
-                  >
-                    <option value="">選擇交通方式</option>
-                    {ROUTE_TRANSPORT_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="input-group">
-                  <label>出發線別</label>
-                  <input
-                    type="text"
-                    value={route.line}
-                    onChange={(e) =>
-                      updateRoute(route.id, "line", e.target.value)
-                    }
-                    placeholder="例如：堺筋線"
-                  />
-                </div>
-                <div className="input-group">
-                  <label>搭乘站</label>
-                  <input
-                    type="text"
-                    value={route.station}
-                    onChange={(e) =>
-                      updateRoute(route.id, "station", e.target.value)
-                    }
-                    placeholder="如：難波站"
-                  />
-                </div>
-                <div className="toggle-inline-row">
-                  <span>是否需轉乘</span>
-                  <label className="switch">
-                    <input
-                      type="checkbox"
-                      checked={route.requiresTransfer || false}
-                      onChange={(e) => {
-                        updateRoute(
-                          route.id,
-                          "requiresTransfer",
-                          e.target.checked
-                        );
-                        if (!e.target.checked) {
-                          updateRoute(route.id, "transferSegments", []);
-                          setTransferInputs((prev) => {
-                            const updated = { ...prev };
-                            delete updated[route.id];
-                            return updated;
-                          });
-                        }
-                      }}
-                    />
-                    <span className="slider" />
-                  </label>
-                </div>
-              </div>
-              {route.requiresTransfer && (
-                <div className="transfer-section">
-                  <label>轉乘線別與站名</label>
-                  <div className="transfer-input-row">
-                    <input
-                      type="text"
-                      value={transferInputs[route.id]?.line || ""}
-                      onChange={(e) =>
-                        handleTransferInputChange(
-                          route.id,
-                          "line",
-                          e.target.value
-                        )
-                      }
-                      placeholder="轉乘線"
-                    />
-                    <input
-                      type="text"
-                      value={transferInputs[route.id]?.station || ""}
-                      onChange={(e) =>
-                        handleTransferInputChange(
-                          route.id,
-                          "station",
-                          e.target.value
-                        )
-                      }
-                      placeholder="轉乘站"
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-small"
-                      onClick={() => addTransferSegment(route.id)}
-                    >
-                      新增
-                    </button>
-                  </div>
-                  {route.transferSegments &&
-                    route.transferSegments.length > 0 && (
-                      <div className="transfer-chips">
-                        {route.transferSegments.map((segment, index) => (
-                          <span
-                            key={`${route.id}-segment-${index}`}
-                            className="transfer-chip"
-                          >
-                            {segment.line && <strong>{segment.line}</strong>}{" "}
-                            {segment.station}
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeTransferSegment(route.id, index)
-                              }
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                </div>
-              )}
+          {formData.arrivalMethods.length === 0 && (
+            <div className="empty-route">
+              <p>尚未設定抵達方式</p>
+              <p className="empty-route-hint">例如：地鐵 / 青砥站</p>
             </div>
-          ))}
+          )}
+          <div className="arrival-methods-list">
+            {formData.arrivalMethods.map((method) => (
+              <div key={method.id} className="arrival-method-card">
+                <div className="arrival-method-card-header">
+                  <h4>{method.mode === "bus" ? "巴士" : "地鐵"}</h4>
+                  <DeleteIcon onClick={() => removeArrivalMethod(method.id)} />
+                </div>
+                <div className="arrival-method-grid">
+                  <div className="input-group">
+                    <label>抵達方式</label>
+                    <select
+                      value={method.mode}
+                      onChange={(e) =>
+                        updateArrivalMethod(method.id, "mode", e.target.value)
+                      }
+                    >
+                      <option value="subway">地鐵</option>
+                      <option value="bus">巴士</option>
+                    </select>
+                  </div>
+                  <div className="input-group">
+                    <label>線別</label>
+                    <input
+                      type="text"
+                      value={method.line}
+                      onChange={(e) =>
+                        updateArrivalMethod(method.id, "line", e.target.value)
+                      }
+                      placeholder="例如：京成本線"
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>站別</label>
+                    <input
+                      type="text"
+                      value={method.station}
+                      onChange={(e) =>
+                        updateArrivalMethod(method.id, "station", e.target.value)
+                      }
+                      placeholder="例如：青砥站"
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>票價</label>
+                    <input
+                      type="text"
+                      value={method.fare || ""}
+                      onChange={(e) =>
+                        updateArrivalMethod(method.id, "fare", e.target.value)
+                      }
+                      placeholder="例如：¥230"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="arrival-actions">
+            <button type="button" className="btn btn-outline" onClick={addArrivalMethod}>
+              + 新增抵達方式
+            </button>
+          </div>
         </div>
-        <button type="button" className="btn btn-outline" onClick={addRoute}>
-          + 新增目的地
-        </button>
       </section>
 
       <section className="accommodation-section">
@@ -530,15 +387,23 @@ const AccommodationTab = ({
               placeholder="https://..."
             />
           </div>
-          <div className="input-group checkbox-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={formData.isPaid || false}
-                onChange={(e) => handleFieldChange("isPaid", e.target.checked)}
-              />
-              <span>已轉帳 / 已付款</span>
-            </label>
+          <div className="input-group input-group-full">
+            <label>付款狀態</label>
+            <div className="payment-tag-group">
+              {PAYMENT_OPTIONS.map((option) => (
+                <button
+                  type="button"
+                  key={option.value}
+                  className={`payment-tag ${
+                    formData.paymentStatus === option.value ? "active" : ""
+                  }`}
+                  onClick={() => handlePaymentStatusSelect(option.value)}
+                  aria-pressed={formData.paymentStatus === option.value}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="input-group input-group-full">
             <label>備註</label>
@@ -563,30 +428,11 @@ const AccommodationTab = ({
         </button>
         <button
           type="button"
-          className="btn btn-outline btn-large"
-          onClick={handleReset}
-          disabled={!isDirty}
+          className="text-link-button"
+          onClick={handleCancelEdit}
         >
-          重設
+          取消
         </button>
-        {confirmedAccommodation && (
-          <button
-            type="button"
-            className="text-link-button"
-            onClick={handleCancelEdit}
-          >
-            取消編輯
-          </button>
-        )}
-        {confirmedAccommodation && (
-          <button
-            type="button"
-            className="text-link-button danger-link"
-            onClick={handleClear}
-          >
-            清除已儲存內容
-          </button>
-        )}
       </div>
     </div>
   );
@@ -597,28 +443,12 @@ const AccommodationTab = ({
       <div className="confirmation-summary">
         <div className="summary-grid">
           <div>
-            <span className="summary-label">入住時間</span>
-            <p>
-              {formData.checkIn
-                ? new Date(formData.checkIn).toLocaleString()
-                : "—"}
-            </p>
-          </div>
-          <div>
-            <span className="summary-label">Checkout</span>
-            <p>
-              {formData.checkOut
-                ? new Date(formData.checkOut).toLocaleString()
-                : "—"}
-            </p>
-          </div>
-          <div>
             <span className="summary-label">住宿金額</span>
             <p>{formData.price || "—"}</p>
           </div>
           <div>
             <span className="summary-label">訂房日期</span>
-            <p>{formData.bookingDate || "—"}</p>
+            <p>{formatDisplayDate(formData.bookingDate)}</p>
           </div>
           <div>
             <span className="summary-label">訂位代號</span>
@@ -626,27 +456,24 @@ const AccommodationTab = ({
           </div>
           <div>
             <span className="summary-label">付款狀態</span>
-            <p>{formData.isPaid ? "已付款" : "尚未付款"}</p>
+            <p>{getPaymentStatusLabel(formData.paymentStatus)}</p>
           </div>
-          <div className="summary-full">
-            <span className="summary-label">訂房網址</span>
-            {formData.bookingUrl ? (
-              <a href={formData.bookingUrl} target="_blank" rel="noreferrer">
-                {formData.bookingUrl}
-              </a>
-            ) : (
-              <p>—</p>
-            )}
-          </div>
-          <div className="summary-full">
-            <span className="summary-label">Google Map</span>
-            {formData.mapsUrl ? (
-              <a href={formData.mapsUrl} target="_blank" rel="noreferrer">
-                開啟連結
-              </a>
-            ) : (
-              <p>—</p>
-            )}
+          <div className="summary-link-block">
+            <span className="summary-label">
+              {formData.bookingUrl ? (
+                <a
+                  href={formData.bookingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="summary-link-inline"
+                >
+                  訂房網址
+                </a>
+              ) : (
+                "訂房網址"
+              )}
+            </span>
+            <p>{formData.bookingUrl ? "開啟連結" : "—"}</p>
           </div>
           {formData.notes && (
             <div className="summary-full">

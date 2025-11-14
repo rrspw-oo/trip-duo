@@ -10,9 +10,10 @@ const DailyItineraryTab = ({
   onToggleDayCompleted,
   onAddLocation,
   onRemoveLocation,
+  onUpdateLocation,
   onUpdateDayTitle,
   startDate,
-  currentUser
+  currentUser,
 }) => {
   // Generate all days based on totalDays
   const allDays = Array.from({ length: totalDays }, (_, i) => `Day ${i + 1}`);
@@ -47,11 +48,14 @@ const DailyItineraryTab = ({
             day={day}
             dayPlan={dailyPlans[day] || { locations: {} }}
             isExpanded={expandedDays[day]}
-            isCompleted={skippedDays[day] !== undefined ? skippedDays[day] : isDayPast(day)}
+            isCompleted={
+              skippedDays[day] !== undefined ? skippedDays[day] : isDayPast(day)
+            }
             onToggleExpanded={onToggleDayExpanded}
             onToggleCompleted={onToggleDayCompleted}
             onAddLocation={onAddLocation}
             onRemoveLocation={onRemoveLocation}
+            onUpdateLocation={onUpdateLocation}
             onUpdateDayTitle={onUpdateDayTitle}
             currentUser={currentUser}
           />

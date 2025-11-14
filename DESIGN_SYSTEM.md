@@ -27,7 +27,7 @@ This design system is inspired by two Japanese masters of organic, sculptural, a
 ```css
 --color-terra-cotta: #D4876D    /* Warm terra cotta - primary actions */
 --color-warm-sand: #F4E4D4      /* Warm sand - backgrounds */
---color-sage-green: #A8B89F     /* Sage green - secondary accents */
+--color-sage-green: #D9C6B0     /* Sage green - secondary accents */
 --color-soft-coral: #F2A494     /* Soft coral - highlights */
 ```
 

@@ -9,16 +9,29 @@ const ShoppingListTab = ({
   onAddShoppingItem,
   onToggleItemCheck,
   onDeleteShoppingItem,
+  onUpdateShoppingItem,
+  allUsers,
   currentUser,
   userMetadata
 }) => {
   const [showForm] = useState(true);
+  const [activeTab, setActiveTab] = useState('mine');
+
+  const otherUserId = allUsers?.find(uid => uid !== currentUser.uid);
 
   // Get list of existing item names for duplicate checking
   const existingItemNames = Object.values(shoppingListItems).map(item => item.itemName);
 
-  // Convert items object to array and sort: unpurchased first, then purchased
-  const itemsArray = Object.entries(shoppingListItems)
+  // Filter items based on active tab
+  const itemsToDisplay = Object.entries(shoppingListItems)
+    .filter(([_, item]) => {
+      if (activeTab === 'mine') {
+        return item.addedBy === currentUser.uid;
+      } else if (activeTab === 'other') {
+        return item.addedBy === otherUserId;
+      }
+      return false;
+    })
     .map(([id, item]) => ({ ...item, id }))
     .sort((a, b) => {
       // Unpurchased items first
@@ -51,29 +64,47 @@ const ShoppingListTab = ({
       )}
 
       <div className="items-container">
-        {itemsArray.length > 0 ? (
-          <div className="items-section">
-            <div className="items-list">
-              {itemsArray.map(item => (
-                <ShoppingListCard
-                  key={item.id}
-                  item={item}
-                  currentUser={currentUser}
-                  onToggleCheck={onToggleItemCheck}
-                  onDelete={onDeleteShoppingItem}
-                  userMetadata={userMetadata}
-                />
-              ))}
-            </div>
-          </div>
-        ) : (
-          !showForm && (
+        <div className="unified-items-tabs">
+          <button
+            className={`unified-tab-btn ${activeTab === 'mine' ? 'active' : ''}`}
+            onClick={() => setActiveTab('mine')}
+          >
+            個人想買
+          </button>
+          {otherUserId && (
+            <button
+              className={`unified-tab-btn ${activeTab === 'other' ? 'active' : ''}`}
+              onClick={() => setActiveTab('other')}
+            >
+              {(() => {
+                const userMeta = userMetadata?.[otherUserId];
+                const userEmail = userMeta?.email || otherUserId;
+                const userName = userEmail.split('@')[0];
+                return userName;
+              })()}
+            </button>
+          )}
+        </div>
+
+        <div className="items-list">
+          {itemsToDisplay.length > 0 ? (
+            itemsToDisplay.map(item => (
+              <ShoppingListCard
+                key={item.id}
+                item={item}
+                currentUser={currentUser}
+                onToggleCheck={onToggleItemCheck}
+                onDelete={onDeleteShoppingItem}
+                onUpdate={onUpdateShoppingItem}
+                userMetadata={userMetadata}
+              />
+            ))
+          ) : (
             <div className="empty-state">
-              <p>尚未新增任何物品</p>
-              <p className="empty-state-hint">點擊「+ 新增物品」開始建立清單</p>
+              <p>此分類尚未新增任何物品</p>
             </div>
-          )
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

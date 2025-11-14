@@ -1,0 +1,1247 @@
+import React, { useState, useEffect } from "react";
+import TagSelector from "../common/TagSelector";
+import CustomDropdown from "../common/CustomDropdown";
+import { TIME_PERIOD_OPTIONS } from "../../constants/options";
+
+const ROUTE_TRANSPORT_OPTIONS = ["地鐵", "巴士", "步行", "計程車", "其他"];
+const MAX_LOCATION_ROUTES = 3;
+const MAX_ROUTE_POIS = 5;
+
+const createEmptyRoute = () => ({
+  id: `loc-route-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  transportMode: "",
+  customTransport: "",
+  departAt: "",
+  arriveAt: "",
+  line: "",
+  station: "",
+  fare: "",
+  requiresTransfer: false,
+  transferSegments: [],
+  isSaved: false,
+  pois: [],
+});
+
+const createEmptyPoiDraft = () => ({
+  name: "",
+  address: "",
+  visitTime: "",
+  note: "",
+});
+
+const LocationForm = ({
+  day,
+  onAddLocation,
+  onUpdateLocation,
+  currentUser,
+  onScheduleSaved,
+  onCancel,
+  initialLocation = null,
+  mode = "create",
+  editingLocationIndex = null,
+}) => {
+  const [destination, setDestination] = useState("");
+  const [timePeriod, setTimePeriod] = useState("");
+  const [routes, setRoutes] = useState([]);
+  const [routeTransferInputs, setRouteTransferInputs] = useState({});
+  const [routePoiDrafts, setRoutePoiDrafts] = useState({});
+  const [routePoiFormVisible, setRoutePoiFormVisible] = useState({});
+  const isEditMode = mode === "edit";
+  const primaryButtonLabel = isEditMode ? "更新此行程" : "儲存此行程";
+  const cancelButtonLabel = isEditMode ? "取消編輯" : "取消新增";
+
+  const resetFormState = () => {
+    setDestination("");
+    setTimePeriod("");
+    setRoutes([]);
+    setRouteTransferInputs({});
+    setRoutePoiDrafts({});
+    setRoutePoiFormVisible({});
+  };
+
+  const addLocationRoute = () => {
+    if (routes.length >= MAX_LOCATION_ROUTES) return;
+    setRoutes((prev) => [...prev, createEmptyRoute()]);
+  };
+
+  const updateLocationRoute = (routeId, field, value) => {
+    setRoutes((prev) =>
+      prev.map((route) => {
+        if (route.id !== routeId) return route;
+        const updatedRoute = { ...route, [field]: value };
+        if (field === "transportMode" && value !== "其他") {
+          updatedRoute.customTransport = "";
+        }
+        if (field === "requiresTransfer" && !value) {
+          updatedRoute.transferSegments = [];
+          setRouteTransferInputs((prevInputs) => {
+            const copy = { ...prevInputs };
+            delete copy[routeId];
+            return copy;
+          });
+        }
+        return updatedRoute;
+      })
+    );
+  };
+
+  const removeLocationRoute = (routeId) => {
+    setRoutes((prev) => prev.filter((route) => route.id !== routeId));
+    setRouteTransferInputs((prev) => {
+      const updated = { ...prev };
+      delete updated[routeId];
+      return updated;
+    });
+    setRoutePoiDrafts((prev) => {
+      const updated = { ...prev };
+      delete updated[routeId];
+      return updated;
+    });
+    setRoutePoiFormVisible((prev) => {
+      const updated = { ...prev };
+      delete updated[routeId];
+      return updated;
+    });
+  };
+
+  const handleRouteTransferInputChange = (routeId, field, value) => {
+    setRouteTransferInputs((prev) => ({
+      ...prev,
+      [routeId]: {
+        ...(prev[routeId] || { line: "", station: "" }),
+        [field]: value,
+      },
+    }));
+  };
+
+  const addLocationTransferSegment = (routeId) => {
+    const pending = routeTransferInputs[routeId] || { line: "", station: "" };
+    const cleanedLine = pending.line.trim();
+    const cleanedStation = pending.station.trim();
+    if (!cleanedLine && !cleanedStation) return;
+
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? {
+              ...route,
+              isSaved: false,
+              transferSegments: [
+                ...(route.transferSegments || []),
+                {
+                  id: `transfer-${Date.now()}-${Math.random()
+                    .toString(36)
+                    .slice(2, 7)}`,
+                  line: cleanedLine,
+                  station: cleanedStation,
+                },
+              ],
+            }
+          : route
+      )
+    );
+
+    setRouteTransferInputs((prev) => ({
+      ...prev,
+      [routeId]: { line: "", station: "" },
+    }));
+  };
+
+  const removeLocationTransferSegment = (routeId, segmentIndex) => {
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? {
+              ...route,
+              isSaved: false,
+              transferSegments: (route.transferSegments || []).filter(
+                (_, idx) => idx !== segmentIndex
+              ),
+            }
+          : route
+      )
+    );
+  };
+
+  const sanitizePoi = (poi, fallbackId) => ({
+    id:
+      poi.id ||
+      fallbackId ||
+      `poi-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    name: poi.name?.trim() || "",
+    address: poi.address?.trim() || "",
+    visitTime: poi.visitTime || "",
+    note: poi.note?.trim() || "",
+  });
+
+  const sanitizeRoute = (route, index) => {
+    const transportValue =
+      route.transportMode === "其他"
+        ? route.customTransport?.trim() || "其他"
+        : route.transportMode || "";
+
+    const sanitizedPois = Array.isArray(route.pois)
+      ? route.pois
+          .map((poi, poiIndex) =>
+            sanitizePoi(poi, `route-${route.id}-poi-${poiIndex}`)
+          )
+          .filter((poi) => poi.name)
+      : [];
+
+    return {
+      id: route.id || `route-${Date.now()}-${index}`,
+      transportMode: transportValue || "",
+      departAt: route.departAt || "",
+      arriveAt: route.arriveAt || "",
+      line: route.line?.trim() || "",
+      station: route.station?.trim() || "",
+      fare: route.fare?.trim() || "",
+      requiresTransfer: Boolean(route.requiresTransfer),
+      transferSegments: Array.isArray(route.transferSegments)
+        ? route.transferSegments.map((segment, segmentIndex) => ({
+            id: segment.id || `transfer-${route.id}-${segmentIndex}`,
+            line: segment.line?.trim() || "",
+            station: segment.station?.trim() || "",
+          }))
+        : [],
+      pois: sanitizedPois,
+    };
+  };
+
+  const mapExistingRoutesToState = (routesSource, isEditMode) => {
+    const normalizedList = Array.isArray(routesSource)
+      ? routesSource
+      : Object.values(routesSource || {});
+
+    return normalizedList.map((route, idx) => {
+      const baseTransport = route.transportMode || "";
+      const isCustomTransport =
+        baseTransport &&
+        !ROUTE_TRANSPORT_OPTIONS.includes(baseTransport);
+      return {
+        ...createEmptyRoute(),
+        ...route,
+        id:
+          route.id ||
+          `loc-route-${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${idx}`,
+        transportMode: isCustomTransport ? "其他" : baseTransport || "",
+        customTransport: isCustomTransport ? baseTransport : route.customTransport || "",
+        departAt: route.departAt || "",
+        arriveAt: route.arriveAt || "",
+        line: route.line || "",
+        station: route.station || "",
+        fare: route.fare || "",
+        requiresTransfer: Boolean(route.requiresTransfer),
+        transferSegments: Array.isArray(route.transferSegments)
+          ? route.transferSegments.map((segment, segmentIndex) => ({
+              id: segment.id || `transfer-${route.id || "existing"}-${segmentIndex}`,
+              line: segment.line || "",
+              station: segment.station || "",
+            }))
+          : [],
+        pois: Array.isArray(route.pois)
+          ? route.pois.map((poi, poiIndex) =>
+              sanitizePoi(poi, `route-${route.id || "existing"}-poi-${poiIndex}`)
+            )
+          : [],
+        isSaved: true,
+      };
+    });
+  };
+
+  useEffect(() => {
+    if (isEditMode && initialLocation) {
+      setDestination(
+        initialLocation.destination ||
+          initialLocation.name ||
+          ""
+      );
+      setTimePeriod(initialLocation.timePeriod || "");
+      const preparedRoutes = mapExistingRoutesToState(
+        initialLocation.routes,
+        isEditMode
+      );
+      setRoutes(preparedRoutes);
+      setRouteTransferInputs({});
+      setRoutePoiDrafts({});
+      setRoutePoiFormVisible({});
+    }
+  }, [isEditMode, initialLocation]);
+
+  const handleSaveRoute = (routeId) => {
+    let validationFailed = false;
+    setRoutes((prev) => {
+      const updated = prev.map((route, index) => {
+        if (route.id !== routeId) return route;
+        const transportRequired =
+          route.transportMode && route.transportMode !== "其他"
+            ? route.transportMode
+            : route.customTransport?.trim();
+        if (!transportRequired) {
+          validationFailed = true;
+          return route;
+        }
+        return { ...sanitizeRoute(route, index), isSaved: true };
+      });
+      return validationFailed ? prev : updated;
+    });
+
+    if (validationFailed) {
+      alert("請填寫交通工具");
+    } else {
+      setRouteTransferInputs((prev) => {
+        const copy = { ...prev };
+        delete copy[routeId];
+        return copy;
+      });
+      setRoutePoiFormVisible((prev) => {
+        const copy = { ...prev };
+        delete copy[routeId];
+        return copy;
+      });
+    }
+  };
+
+  const getRoutePoiDraft = (routeId) =>
+    routePoiDrafts[routeId] || createEmptyPoiDraft();
+
+  const updateRoutePoiDraft = (routeId, field, value) => {
+    setRoutePoiDrafts((prev) => ({
+      ...prev,
+      [routeId]: {
+        ...(prev[routeId] || createEmptyPoiDraft()),
+        [field]: value,
+      },
+    }));
+  };
+
+  const addPoiToRoute = (routeId) => {
+    const draft = getRoutePoiDraft(routeId);
+    if (!draft.name.trim()) {
+      alert("請輸入必訪地點名稱");
+      return;
+    }
+
+    setRoutes((prev) =>
+      prev.map((route) => {
+        if (route.id !== routeId) return route;
+        const currentPois = route.pois || [];
+        if (currentPois.length >= MAX_ROUTE_POIS) {
+          alert(`單一路線最多 ${MAX_ROUTE_POIS} 筆必訪地點`);
+          return route;
+        }
+        return {
+          ...route,
+          pois: [
+            ...currentPois,
+            sanitizePoi(
+              {
+                ...draft,
+                id: `poi-${Date.now()}-${Math.random()
+                  .toString(36)
+                  .slice(2, 5)}`,
+              },
+              null
+            ),
+          ],
+        };
+      })
+    );
+
+    setRoutePoiDrafts((prev) => ({
+      ...prev,
+      [routeId]: createEmptyPoiDraft(),
+    }));
+  };
+
+  const updateRoutePoiField = (routeId, poiIndex, field, value) => {
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? {
+              ...route,
+              isSaved: false,
+              pois: (route.pois || []).map((poi, idx) =>
+                idx === poiIndex ? { ...poi, [field]: value } : poi
+              ),
+            }
+          : route
+      )
+    );
+  };
+
+  const removePoiFromRoute = (routeId, poiIndex) => {
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? {
+              ...route,
+              pois: (route.pois || []).filter((_, idx) => idx !== poiIndex),
+            }
+          : route
+      )
+    );
+  };
+
+  const toggleRoutePoiForm = (routeId, visible) => {
+    setRoutePoiFormVisible((prev) => ({
+      ...prev,
+      [routeId]: visible,
+    }));
+    if (!visible) {
+      setRoutePoiDrafts((prev) => ({
+        ...prev,
+        [routeId]: createEmptyPoiDraft(),
+      }));
+    }
+  };
+
+  const handleAddLocation = () => {
+    if (!destination.trim()) {
+      alert("請輸入目的地");
+      return;
+    }
+
+    if (!timePeriod) {
+      alert("請選擇時段");
+      return;
+    }
+
+    if (routes.length === 0) {
+      alert("請至少建立一條路線");
+      return;
+    }
+
+    const preparedRoutes = isEditMode
+      ? routes
+      : routes.filter((route) => route.isSaved);
+
+    if (!isEditMode && preparedRoutes.length === 0) {
+      alert("請先完成路線儲存");
+      return;
+    }
+
+    const sanitizedRoutes = preparedRoutes.map(sanitizeRoute);
+    const flattenedPois = sanitizedRoutes.flatMap((route) => route.pois || []);
+
+    const locationData = {
+      id:
+        (isEditMode && initialLocation && initialLocation.id) || Date.now(),
+      name: destination.trim(),
+      destination: destination.trim(),
+      timePeriod,
+      routes: sanitizedRoutes,
+      pois: flattenedPois,
+    };
+
+    if (currentUser) {
+      locationData.createdBy = {
+        email: currentUser.email,
+        uid: currentUser.uid,
+      };
+    }
+
+    if (isEditMode && typeof onUpdateLocation === "function" && editingLocationIndex !== null) {
+      onUpdateLocation(day, editingLocationIndex, locationData);
+    } else {
+      onAddLocation(day, locationData);
+    }
+    resetFormState();
+
+    if (onScheduleSaved) {
+      onScheduleSaved();
+    }
+  };
+
+  const handleCancelForm = () => {
+    resetFormState();
+    if (onCancel) {
+      onCancel();
+    }
+  };
+
+  const renderRoutePoiManager = (route) => {
+    const isPoiFormVisible = routePoiFormVisible[route.id];
+
+    return (
+      <div className="route-poi-inline">
+        <div className="route-poi-list">
+          <h5>必訪地點</h5>
+          {route.pois && route.pois.length > 0 ? (
+            <ul>
+              {route.pois.map((poi, idx) => (
+                <li key={poi.id || idx} className="route-poi-item">
+                  <div className="route-poi-index">{idx + 1}</div>
+                  <div className="route-poi-content">
+                    {isEditMode ? (
+                      <>
+                        <div className="form-grid form-grid-two">
+                          <div className="input-group">
+                            <label>地點名稱 *</label>
+                            <input
+                              type="text"
+                              value={poi.name || ""}
+                              onChange={(e) =>
+                                updateRoutePoiField(
+                                  route.id,
+                                  idx,
+                                  "name",
+                                  e.target.value
+                                )
+                              }
+                              className="location-input"
+                              placeholder="例如：鎌倉小町通咖啡"
+                            />
+                          </div>
+                          <div className="input-group">
+                            <label>建議時間</label>
+                            <input
+                              type="time"
+                              value={poi.visitTime || ""}
+                              onChange={(e) =>
+                                updateRoutePoiField(
+                                  route.id,
+                                  idx,
+                                  "visitTime",
+                                  e.target.value
+                                )
+                              }
+                              className="location-input"
+                            />
+                          </div>
+                        </div>
+                        <div className="input-group input-group-full">
+                          <label>地址</label>
+                          <input
+                            type="text"
+                            value={poi.address || ""}
+                            onChange={(e) =>
+                              updateRoutePoiField(
+                                route.id,
+                                idx,
+                                "address",
+                                e.target.value
+                              )
+                            }
+                            className="location-input"
+                            placeholder="輸入地址或定位"
+                          />
+                        </div>
+                        <div className="input-group input-group-full">
+                          <label>備註</label>
+                          <input
+                            type="text"
+                            value={poi.note || ""}
+                            onChange={(e) =>
+                              updateRoutePoiField(
+                                route.id,
+                                idx,
+                                "note",
+                                e.target.value
+                              )
+                            }
+                            className="location-input"
+                            placeholder="例如：10:00 開門，記得預約"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="route-poi-columns">
+                          <div className="route-poi-column">
+                            <span className="route-summary-label">地點</span>
+                            <span className="route-summary-value">
+                              {poi.name || "--"}
+                            </span>
+                          </div>
+                          <div className="route-poi-column">
+                            <span className="route-summary-label">時間</span>
+                            <span className="route-summary-value">
+                              {poi.visitTime || "--"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="route-poi-address-block">
+                          <span className="route-summary-label">地址</span>
+                          {poi.address ? (
+                            <button
+                              type="button"
+                              className="poi-address-link route-poi-address-link"
+                              onClick={() =>
+                                window.open(
+                                  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                    poi.address
+                                  )}`,
+                                  "_blank",
+                                  "noopener,noreferrer"
+                                )
+                              }
+                            >
+                              {poi.address}
+                            </button>
+                          ) : (
+                            <span className="route-summary-value">--</span>
+                          )}
+                        </div>
+                        {poi.note && (
+                          <div className="route-poi-note-inline">
+                            <span className="route-summary-label">備註</span>
+                            <span className="route-summary-text">
+                              {poi.note}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-remove btn-small route-poi-remove"
+                    onClick={() => removePoiFromRoute(route.id, idx)}
+                  >
+                    移除
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="empty-route-poi">尚未新增必訪地點</p>
+          )}
+        </div>
+        <div className="route-poi-actions">
+          {!isPoiFormVisible ? (
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={() => toggleRoutePoiForm(route.id, true)}
+              disabled={(route.pois || []).length >= MAX_ROUTE_POIS}
+            >
+              + 新增必訪地點
+            </button>
+          ) : (
+            <div className="route-poi-form route-poi-form-inline">
+              <div className="input-group">
+                <label>地點名稱 *</label>
+                <input
+                  type="text"
+                  value={getRoutePoiDraft(route.id).name}
+                  onChange={(e) =>
+                    updateRoutePoiDraft(route.id, "name", e.target.value)
+                  }
+                  className="location-input"
+                  placeholder="例如：鎌倉小町通咖啡"
+                />
+              </div>
+              <div className="input-group">
+                <label>地址</label>
+                <input
+                  type="text"
+                  value={getRoutePoiDraft(route.id).address}
+                  onChange={(e) =>
+                    updateRoutePoiDraft(route.id, "address", e.target.value)
+                  }
+                  className="location-input"
+                  placeholder="輸入地址或定位"
+                />
+              </div>
+              <div className="input-group">
+                <label>建議時間</label>
+                <input
+                  type="time"
+                  value={getRoutePoiDraft(route.id).visitTime}
+                  onChange={(e) =>
+                    updateRoutePoiDraft(route.id, "visitTime", e.target.value)
+                  }
+                  className="location-input"
+                />
+              </div>
+              <div className="input-group route-poi-note">
+                <label>備註</label>
+                <input
+                  type="text"
+                  value={getRoutePoiDraft(route.id).note}
+                  onChange={(e) =>
+                    updateRoutePoiDraft(route.id, "note", e.target.value)
+                  }
+                  className="location-input"
+                  placeholder="例如：10:00 開門，記得預約"
+                />
+              </div>
+              <div className="route-poi-form-actions">
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => addPoiToRoute(route.id)}
+                  disabled={(route.pois || []).length >= MAX_ROUTE_POIS}
+                >
+                  儲存必訪地點
+                </button>
+                <button
+                  type="button"
+                  className="text-link-button"
+                  onClick={() => toggleRoutePoiForm(route.id, false)}
+                >
+                  取消
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderRouteForm = (route) => (
+    <>
+      <div className="form-grid form-grid-two">
+        <div className="input-group">
+          <label>交通工具 *</label>
+          <CustomDropdown
+            value={route.transportMode}
+            onChange={(option) =>
+              updateLocationRoute(route.id, "transportMode", option)
+            }
+            options={ROUTE_TRANSPORT_OPTIONS}
+            placeholder="選擇交通方式"
+          />
+        </div>
+        {route.transportMode === "其他" && (
+          <div className="input-group">
+            <label>自訂交通方式</label>
+            <input
+              type="text"
+              value={route.customTransport || ""}
+              onChange={(e) =>
+                updateLocationRoute(route.id, "customTransport", e.target.value)
+              }
+              className="location-input"
+              placeholder="請輸入交通工具"
+            />
+          </div>
+        )}
+        <div className="input-group">
+          <label>票價</label>
+          <input
+            type="text"
+            value={route.fare}
+            onChange={(e) =>
+              updateLocationRoute(route.id, "fare", e.target.value)
+            }
+            className="location-input"
+            placeholder="例如：¥230"
+          />
+        </div>
+      </div>
+      <div className="form-grid form-grid-two route-time-grid">
+        <div className="input-group">
+          <label>出發時間</label>
+          <input
+            type="time"
+            value={route.departAt}
+            onChange={(e) =>
+              updateLocationRoute(route.id, "departAt", e.target.value)
+            }
+            className="location-input"
+          />
+        </div>
+        <div className="input-group">
+          <label>預計抵達時間</label>
+          <input
+            type="time"
+            value={route.arriveAt}
+            onChange={(e) =>
+              updateLocationRoute(route.id, "arriveAt", e.target.value)
+            }
+            className="location-input"
+          />
+        </div>
+      </div>
+      <div className="form-grid form-grid-two">
+        <div className="input-group">
+          <label>線別</label>
+          <input
+            type="text"
+            value={route.line}
+            onChange={(e) =>
+              updateLocationRoute(route.id, "line", e.target.value)
+            }
+            className="location-input"
+            placeholder="例如：京成本線"
+          />
+        </div>
+        <div className="input-group station-with-toggle">
+          <label>搭乘站</label>
+          <input
+            type="text"
+            value={route.station}
+            onChange={(e) =>
+              updateLocationRoute(route.id, "station", e.target.value)
+            }
+            className="location-input"
+            placeholder="例如：青砥站"
+          />
+          <div className="toggle-inline-row toggle-under-station">
+            <span>是否需轉乘</span>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={route.requiresTransfer || false}
+                onChange={(e) =>
+                  updateLocationRoute(
+                    route.id,
+                    "requiresTransfer",
+                    e.target.checked
+                  )
+                }
+              />
+              <span className="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      {route.requiresTransfer && (
+        <div className="transfer-section">
+          <label>轉乘線別與站名</label>
+          <div className="transfer-input-row">
+            <input
+              type="text"
+              value={routeTransferInputs[route.id]?.line || ""}
+              onChange={(e) =>
+                handleRouteTransferInputChange(route.id, "line", e.target.value)
+              }
+              className="location-input"
+              placeholder="轉乘線"
+            />
+            <input
+              type="text"
+              value={routeTransferInputs[route.id]?.station || ""}
+              onChange={(e) =>
+                handleRouteTransferInputChange(
+                  route.id,
+                  "station",
+                  e.target.value
+                )
+              }
+              className="location-input"
+              placeholder="轉乘站"
+            />
+            <button
+              type="button"
+              className="btn btn-small"
+              onClick={() => addLocationTransferSegment(route.id)}
+            >
+              新增
+            </button>
+          </div>
+          {route.transferSegments && route.transferSegments.length > 0 && (
+            <div className="transfer-chips">
+              {route.transferSegments.map((segment, index) => (
+                <span
+                  key={`${route.id}-segment-${index}`}
+                  className="transfer-chip"
+                >
+                  <span className="transfer-index">{index + 1}</span>
+                  {segment.line && <strong>{segment.line}</strong>}{" "}
+                  {segment.station}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeLocationTransferSegment(route.id, index)
+                    }
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {renderRoutePoiManager(route)}
+      {!isEditMode && (
+        <div className="route-card-actions">
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => handleSaveRoute(route.id)}
+          >
+            儲存路線
+          </button>
+          <button
+            type="button"
+            className="text-link-button"
+            onClick={() => removeLocationRoute(route.id)}
+          >
+            取消本路線
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  const renderRouteSummary = (route, routeIndex) => {
+    const isPoiFormVisible = routePoiFormVisible[route.id];
+
+    return (
+      <div className="route-summary-stack">
+        <div className="route-summary-index">{routeIndex + 1}</div>
+        <div className="route-summary-body">
+          {isEditMode ? (
+            renderRouteForm(route)
+          ) : (
+            <div className="route-visual-row route-visual-row-main">
+              <div className="route-visual-grid route-visual-grid-main">
+                <div className="route-visual-cell">
+                  <span className="route-summary-label">交通</span>
+                  <span className="route-summary-value">
+                    {route.transportMode || "--"}
+                  </span>
+                </div>
+                <div className="route-visual-cell">
+                  <span className="route-summary-label">線別</span>
+                  <span className="route-summary-value">
+                    {route.line || "--"}
+                  </span>
+                </div>
+                <div className="route-visual-cell">
+                  <span className="route-summary-label">站別</span>
+                  <span className="route-summary-value">
+                    {route.station || "--"}
+                  </span>
+                </div>
+                <div className="route-visual-cell">
+                  <span className="route-summary-label">票價 (JPY)</span>
+                  <span className="route-summary-value">
+                    {route.fare || "--"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          {!isEditMode && route.pois && route.pois.length > 0 && (
+            <div className="route-visual-row route-visual-row-poi">
+              <div className="route-visual-pois">
+                {route.pois.map((poi, idx) => (
+                  <div key={poi.id || idx} className="route-visual-poi">
+                    <div className="route-visual-grid route-visual-grid-poi">
+                      <div className="route-visual-cell">
+                        <span className="route-summary-label">地點</span>
+                        <span className="route-summary-value">
+                          {poi.name || "--"}
+                        </span>
+                      </div>
+                      <div className="route-visual-cell">
+                        <span className="route-summary-label">店家時間</span>
+                        <span className="route-summary-value">
+                          {poi.visitTime || "--"}
+                        </span>
+                      </div>
+                      <div className="route-visual-cell route-visual-cell-address">
+                        <span className="route-summary-label">地址</span>
+                        {poi.address ? (
+                          <button
+                            type="button"
+                            className="poi-address-link route-poi-address-link"
+                            onClick={() =>
+                              window.open(
+                                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                  poi.address
+                                )}`,
+                                "_blank",
+                                "noopener,noreferrer"
+                              )
+                            }
+                          >
+                            {poi.address}
+                          </button>
+                        ) : (
+                          <span className="route-summary-value">--</span>
+                        )}
+                      </div>
+                    </div>
+                    {poi.note && (
+                      <div className="route-visual-note">
+                        <span className="route-summary-label">備註</span>
+                        <span className="route-summary-text">{poi.note}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {renderRoutePoiManager(route)}
+                          </div>
+                          <div className="input-group input-group-full">
+                            <label>地址</label>
+                            <input
+                              type="text"
+                              value={poi.address || ""}
+                              onChange={(e) =>
+                                updateRoutePoiField(
+                                  route.id,
+                                  idx,
+                                  "address",
+                                  e.target.value
+                                )
+                              }
+                              className="location-input"
+                              placeholder="輸入地址或定位"
+                            />
+                          </div>
+                          <div className="input-group input-group-full">
+                            <label>備註</label>
+                            <input
+                              type="text"
+                              value={poi.note || ""}
+                              onChange={(e) =>
+                                updateRoutePoiField(
+                                  route.id,
+                                  idx,
+                                  "note",
+                                  e.target.value
+                                )
+                              }
+                              className="location-input"
+                              placeholder="例如：10:00 開門，記得預約"
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="route-poi-columns">
+                            <div className="route-poi-column">
+                              <span className="route-summary-label">地點</span>
+                              <span className="route-summary-value">
+                                {poi.name || "--"}
+                              </span>
+                            </div>
+                            <div className="route-poi-column">
+                              <span className="route-summary-label">時間</span>
+                              <span className="route-summary-value">
+                                {poi.visitTime || "--"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="route-poi-address-block">
+                            <span className="route-summary-label">地址</span>
+                            {poi.address ? (
+                              <button
+                                type="button"
+                                className="poi-address-link route-poi-address-link"
+                                onClick={() =>
+                                  window.open(
+                                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                      poi.address
+                                    )}`,
+                                    "_blank",
+                                    "noopener,noreferrer"
+                                  )
+                                }
+                              >
+                                {poi.address}
+                              </button>
+                            ) : (
+                              <span className="route-summary-value">--</span>
+                            )}
+                          </div>
+                          {poi.note && (
+                            <div className="route-poi-note-inline">
+                              <span className="route-summary-label">備註</span>
+                              <span className="route-summary-text">
+                                {poi.note}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-remove btn-small route-poi-remove"
+                      onClick={() => removePoiFromRoute(route.id, idx)}
+                    >
+                      移除
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="empty-route-poi">尚未新增必訪地點</p>
+            )}
+          </div>
+          <div className="route-poi-actions">
+            {!isPoiFormVisible ? (
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => toggleRoutePoiForm(route.id, true)}
+                disabled={(route.pois || []).length >= MAX_ROUTE_POIS}
+              >
+                + 新增必訪地點
+              </button>
+            ) : (
+              <div className="route-poi-form route-poi-form-inline">
+                <div className="input-group">
+                  <label>地點名稱 *</label>
+                  <input
+                    type="text"
+                    value={getRoutePoiDraft(route.id).name}
+                    onChange={(e) =>
+                      updateRoutePoiDraft(route.id, "name", e.target.value)
+                    }
+                    className="location-input"
+                    placeholder="例如：鎌倉小町通咖啡"
+                  />
+                </div>
+                <div className="input-group">
+                  <label>地址</label>
+                  <input
+                    type="text"
+                    value={getRoutePoiDraft(route.id).address}
+                    onChange={(e) =>
+                      updateRoutePoiDraft(route.id, "address", e.target.value)
+                    }
+                    className="location-input"
+                    placeholder="輸入地址或定位"
+                  />
+                </div>
+                <div className="input-group">
+                  <label>建議時間</label>
+                  <input
+                    type="time"
+                    value={getRoutePoiDraft(route.id).visitTime}
+                    onChange={(e) =>
+                      updateRoutePoiDraft(route.id, "visitTime", e.target.value)
+                    }
+                    className="location-input"
+                  />
+                </div>
+                <div className="input-group route-poi-note">
+                  <label>備註</label>
+                  <input
+                    type="text"
+                    value={getRoutePoiDraft(route.id).note}
+                    onChange={(e) =>
+                      updateRoutePoiDraft(route.id, "note", e.target.value)
+                    }
+                    className="location-input"
+                    placeholder="例如：10:00 開門，記得預約"
+                  />
+                </div>
+                <div className="route-poi-form-actions">
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={() => addPoiToRoute(route.id)}
+                    disabled={(route.pois || []).length >= MAX_ROUTE_POIS}
+                  >
+                    儲存必訪地點
+                  </button>
+      </div>
+    );
+  };
+
+  return (
+    <div className="schedule-form location-form">
+      <div className="location-section">
+        <div className="section-heading section-heading-inline">
+          <h4>行程概述</h4>
+        </div>
+        <div className="form-row">
+          <div className="input-group input-group-full">
+            <label>目的地 *</label>
+            <input
+              type="text"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              placeholder="例如：鎌倉一日遊"
+              className="location-input"
+              maxLength="80"
+            />
+          </div>
+        </div>
+        <div className="form-row">
+          <TagSelector
+            value={timePeriod}
+            onChange={setTimePeriod}
+            options={TIME_PERIOD_OPTIONS}
+            placeholder=""
+            label="時段"
+          />
+        </div>
+      </div>
+
+      <div className="location-section">
+        <div className="section-heading section-heading-inline">
+          <h4>路線規劃</h4>
+        </div>
+        {routes.length === 0 && !isEditMode && (
+          <div className="empty-route">
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={addLocationRoute}
+            >
+              + 新增路線
+            </button>
+          </div>
+        )}
+        <div className="route-list">
+          {routes.map((route, routeIndex) => (
+            <div
+              key={route.id}
+              className={`route-card ${
+                route.isSaved ? "route-card-saved" : ""
+              }`}
+            >
+              <div className="route-card-header">
+                <h4>路線</h4>
+                <button
+                  type="button"
+                  className="btn-remove btn-small"
+                  onClick={() => removeLocationRoute(route.id)}
+                >
+                  移除
+                </button>
+              </div>
+              {route.isSaved
+                ? renderRouteSummary(route, routeIndex)
+                : renderRouteForm(route)}
+            </div>
+          ))}
+        </div>
+        {!isEditMode && routes.length > 0 && routes.length < MAX_LOCATION_ROUTES && (
+          <div className="route-add-action">
+            <button
+              type="button"
+              className="btn btn-outline ghost-button"
+              onClick={addLocationRoute}
+            >
+              + 新增路線
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="schedule-form-actions">
+        <button onClick={handleAddLocation} className="btn btn-save-schedule">
+          {primaryButtonLabel}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            className="text-link-button"
+            onClick={handleCancelForm}
+          >
+            {cancelButtonLabel}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default LocationForm;

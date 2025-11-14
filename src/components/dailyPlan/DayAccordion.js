@@ -11,11 +11,15 @@ const DayAccordion = ({
   onToggleCompleted,
   onAddLocation,
   onRemoveLocation,
+  onUpdateLocation,
   onUpdateDayTitle,
   currentUser,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editingTitle, setEditingTitle] = useState(dayPlan.title || "");
+  const [showScheduleForm, setShowScheduleForm] = useState(false);
+  const [editingLocationIndex, setEditingLocationIndex] = useState(null);
+  const [editingLocationData, setEditingLocationData] = useState(null);
   const titleInputRef = useRef(null);
 
   // Update editingTitle when dayPlan.title changes
@@ -55,6 +59,27 @@ const DayAccordion = ({
   const locations = Array.isArray(dayPlan.locations)
     ? dayPlan.locations
     : Object.values(dayPlan.locations || {});
+
+  const handleStartNewSchedule = () => {
+    setEditingLocationIndex(null);
+    setEditingLocationData(null);
+    setShowScheduleForm(true);
+  };
+
+  const handleEditLocation = (_day, locationIndex, locationData) => {
+    setEditingLocationIndex(locationIndex);
+    setEditingLocationData(locationData);
+    setShowScheduleForm(true);
+    if (!isExpanded) {
+      onToggleExpanded(day);
+    }
+  };
+
+  const handleFormDismiss = () => {
+    setShowScheduleForm(false);
+    setEditingLocationIndex(null);
+    setEditingLocationData(null);
+  };
 
   return (
     <div className={`day-accordion ${isCompleted ? 'completed' : ''}`}>
@@ -124,7 +149,27 @@ const DayAccordion = ({
       </div>
       {isExpanded && (
         <div className="day-accordion-content">
-          <LocationForm day={day} onAddLocation={onAddLocation} currentUser={currentUser} />
+          {!showScheduleForm ? (
+            <button
+              type="button"
+              className="btn btn-add-schedule"
+              onClick={handleStartNewSchedule}
+            >
+              + 新增行程
+            </button>
+          ) : (
+            <LocationForm
+              day={day}
+              mode={editingLocationIndex !== null ? "edit" : "create"}
+              initialLocation={editingLocationData}
+              editingLocationIndex={editingLocationIndex}
+              onAddLocation={onAddLocation}
+              onUpdateLocation={onUpdateLocation}
+              currentUser={currentUser}
+              onScheduleSaved={handleFormDismiss}
+              onCancel={handleFormDismiss}
+            />
+          )}
           <div className="locations-list">
             {locations.map((location, index) => (
               <LocationCard
@@ -133,6 +178,7 @@ const DayAccordion = ({
                 day={day}
                 index={index}
                 onRemove={onRemoveLocation}
+                onEdit={handleEditLocation}
               />
             ))}
             {locations.length === 0 && (

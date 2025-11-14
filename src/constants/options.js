@@ -15,8 +15,8 @@ export const TRANSPORTATION_OPTIONS = [
 
 // Time period options for daily plan locations
 export const TIME_PERIOD_OPTIONS = [
+  "整天",
   "早上",
-  "中午",
   "下午",
   "晚上"
 ];

@@ -124,8 +124,6 @@ const FlightTab = ({
 
   return (
     <div className="tab-content">
-      <h2>機票確認</h2>
-
       {/* Sub-tabs navigation */}
       <div className="sub-tabs">
         {FLIGHT_SUB_TABS.map((tab) => (

@@ -1,14 +1,29 @@
-import React from "react";
-import { getUserInitials } from "../../utils/firebaseHelpers";
+import React, { useState, useRef, useEffect } from "react";
+import { getUserInitials, getAvatarColor } from "../../utils/firebaseHelpers";
 
 const ShoppingListCard = ({
   item,
   currentUser,
   onToggleCheck,
   onDelete,
+  onUpdate,
   userMetadata
 }) => {
   const { itemName, addedBy, isPurchased = false, timestamp } = item;
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState(itemName);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleToggleCheck = () => {
     onToggleCheck(item.id);
@@ -18,6 +33,18 @@ const ShoppingListCard = ({
     if (window.confirm(`確定要刪除「${itemName}」嗎？`)) {
       onDelete(item.id);
     }
+  };
+
+  const handleSaveEdit = () => {
+    if (editedName.trim() && editedName !== itemName) {
+      onUpdate(item.id, { itemName: editedName.trim() });
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditedName(itemName);
+    setIsEditing(false);
   };
 
   // Format timestamp
@@ -35,42 +62,98 @@ const ShoppingListCard = ({
   const creatorInitials = getUserInitials(creatorEmail);
   const createdTime = formatTimestamp(timestamp);
 
+  // Get user info
+  const userEmail = userMetadata?.[addedBy]?.email || addedBy;
+  const userInitials = getUserInitials(userEmail);
+  const avatarColor = getAvatarColor(userEmail);
+
   return (
     <div className={`pretrip-item-card ${isPurchased ? 'completed' : ''}`}>
       <div className="item-content">
-        <div className="item-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-            <h3 className={isPurchased ? 'strikethrough' : ''}>{itemName}</h3>
-            <div className="personal-checklist">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={isPurchased}
-                  onChange={handleToggleCheck}
-                  className="round-checkbox"
-                />
-                {isPurchased && <span>已買到</span>}
-              </label>
-            </div>
-          </div>
-          {addedBy === currentUser.uid && (
-            <button
-              onClick={handleDelete}
-              className="btn-delete-item"
-              title="刪除"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-              </svg>
-            </button>
-          )}
+        <div className="item-timestamp">
+          {creatorInitials} {createdTime}
         </div>
 
-        <div className="item-footer">
-          <span className="item-creator-info">
-            {creatorInitials} {createdTime}
-          </span>
+        <div className="item-main">
+          <div className="item-name">
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveEdit();
+                  if (e.key === 'Escape') handleCancelEdit();
+                }}
+                className="item-name-input"
+                autoFocus
+                maxLength={100}
+              />
+            ) : (
+              <span className={isPurchased ? 'strikethrough' : ''}>{itemName}</span>
+            )}
+          </div>
+
+          <div className="item-avatars">
+            <div
+              className={`user-avatar-check ${isPurchased ? 'checked' : 'unchecked'}`}
+              style={{
+                backgroundColor: isPurchased ? avatarColor : 'transparent',
+                borderColor: avatarColor,
+                color: isPurchased ? 'white' : avatarColor
+              }}
+              onClick={handleToggleCheck}
+              title={`${userEmail} (點擊切換)`}
+              role="button"
+            >
+              {userInitials}
+            </div>
+          </div>
+
+          {!isEditing && (
+            <div className="item-menu-container" ref={menuRef}>
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="btn-menu"
+                title="選項"
+              >
+                ⋮
+              </button>
+              {showMenu && (
+                <div className="item-dropdown-menu">
+                  <div
+                    className="menu-option"
+                    onClick={() => {
+                      setShowMenu(false);
+                      setIsEditing(true);
+                    }}
+                  >
+                    編輯
+                  </div>
+                  <div
+                    className="menu-option menu-option-danger"
+                    onClick={() => {
+                      setShowMenu(false);
+                      handleDelete();
+                    }}
+                  >
+                    刪除
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {isEditing && (
+            <div className="edit-actions">
+              <button onClick={handleSaveEdit} className="btn-save" title="儲存">
+                ✓
+              </button>
+              <button onClick={handleCancelEdit} className="btn-cancel" title="取消">
+                ✕
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

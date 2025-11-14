@@ -7,7 +7,7 @@ const TravelTimeTab = ({
   totalDays,
   setStartDate,
   setEndDate,
-  onCalculateDays
+  onCalculateDays,
 }) => {
   const hasDateChanged = useMemo(() => {
     if (!startDate || !endDate || totalDays === 0) return true;
@@ -20,22 +20,23 @@ const TravelTimeTab = ({
 
   return (
     <>
-      <h2>旅行時間</h2>
-      <div className="form-group">
-        <label>開始日期:</label>
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-        />
-      </div>
-      <div className="form-group">
-        <label>結束日期:</label>
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-        />
+      <div className="form-row">
+        <div className="form-group">
+          <label>開始日期:</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label>結束日期:</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </div>
       </div>
       <button
         onClick={onCalculateDays}
@@ -43,12 +44,19 @@ const TravelTimeTab = ({
         disabled={!hasDateChanged}
         style={{
           opacity: hasDateChanged ? 1 : 0.5,
-          cursor: hasDateChanged ? 'pointer' : 'not-allowed'
+          cursor: hasDateChanged ? "pointer" : "not-allowed",
         }}
       >
         計算天數
       </button>
-      {totalDays > 0 && <p className="result">總共 {totalDays} 天</p>}
+      {totalDays > 0 && (
+        <div className="travel-duration-result">
+          <div className="duration-content">
+            <span className="duration-label">旅行天數</span>
+            <span className="duration-value">{totalDays} 天</span>
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -54,11 +54,11 @@ const ConfirmedAccommodationTicket = ({ accommodation }) => {
   const checkInFormatted = formatDateTime(accommodation.checkIn);
   const checkOutFormatted = formatDateTime(accommodation.checkOut);
   const stayDuration = calculateDuration(accommodation.checkIn, accommodation.checkOut);
-  const normalizedRoutes = Array.isArray(accommodation.routes)
-    ? accommodation.routes
-    : Object.values(accommodation.routes || {});
   const stationLabel = accommodation.subwayStation || accommodation.nearbyStation || "";
   const subwayLine = accommodation.subwayLine || "";
+  const arrivalMethods = Array.isArray(accommodation.arrivalMethods)
+    ? accommodation.arrivalMethods
+    : Object.values(accommodation.arrivalMethods || {});
 
   return (
     <div className="confirmed-ticket-container">
@@ -126,6 +126,35 @@ const ConfirmedAccommodationTicket = ({ accommodation }) => {
           </div>
         )}
 
+        {arrivalMethods.length > 0 && (
+          <div className="arrival-ticket-list">
+            <div className="section-label">抵達方式</div>
+            <ul>
+              {arrivalMethods.map((method, index) => (
+                <li key={method.id || `arrival-${index}`}>
+                  <div className="arrival-entry">
+                    <div className="arrival-number">{index + 1}</div>
+                    <div className="arrival-columns">
+                      <div className="arrival-col">
+                        <span className="arrival-label">線別</span>
+                        <span className="arrival-value">{method.line || "—"}</span>
+                      </div>
+                      <div className="arrival-col">
+                        <span className="arrival-label">站別</span>
+                        <span className="arrival-value">{method.station || "—"}</span>
+                      </div>
+                      <div className="arrival-col">
+                        <span className="arrival-label">票價 (JPY)</span>
+                        <span className="arrival-value">{method.fare || "—"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {accommodation.amenities && accommodation.amenities.length > 0 && (
           <div className="ticket-detail-section">
             <div className="section-label">住宿提供</div>
@@ -134,36 +163,6 @@ const ConfirmedAccommodationTicket = ({ accommodation }) => {
                 <span key={index} className="tag tag-amenity-compact">{amenity}</span>
               ))}
             </div>
-          </div>
-        )}
-
-        {normalizedRoutes.length > 0 && (
-          <div className="ticket-detail-section routes-summary">
-            <div className="section-label">路線規劃</div>
-            <ul className="route-summary-list">
-              {normalizedRoutes.map((route, index) => (
-                <li key={route.id || `route-${index}`} className="route-summary-item">
-                  <div className="route-summary-destination">
-                    {route.destinationName || "目的地"}
-                  </div>
-                  <div className="route-summary-meta">
-                    {route.transportMode && <span>{route.transportMode}</span>}
-                    {route.line && <span> · {route.line}</span>}
-                    {route.station && <span> · 由 {route.station} 出發</span>}
-                  </div>
-                  {route.requiresTransfer && route.transferSegments && route.transferSegments.length > 0 && (
-                    <div className="route-summary-transfer">
-                      轉乘：
-                      {route.transferSegments
-                        .map((segment) =>
-                          segment.line ? `${segment.line} ${segment.station}` : segment.station
-                        )
-                        .join(" → ")}
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
           </div>
         )}
 
