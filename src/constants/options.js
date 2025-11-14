@@ -57,13 +57,6 @@ export const FLIGHT_SUB_TABS = [
   { id: 3, label: "確認航班" },
 ];
 
-// Accommodation sub-tabs
-export const ACCOMMODATION_SUB_TABS = [
-  { id: 1, label: "新增住宿" },
-  { id: 2, label: "住宿列表" },
-  { id: 3, label: "確認住宿" },
-];
-
 // Amenities options for accommodations
 export const AMENITIES_OPTIONS = [
   "吹風機",

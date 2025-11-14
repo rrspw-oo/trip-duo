@@ -34,16 +34,31 @@ const ConfirmedAccommodationTicket = ({ accommodation }) => {
     return { date, time, weekday };
   };
 
+  const openMapsWindow = (url) => {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   const handleAddressClick = () => {
+    if (accommodation.mapsUrl) {
+      openMapsWindow(accommodation.mapsUrl);
+      return;
+    }
     if (accommodation.address) {
       const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(accommodation.address)}`;
-      window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+      openMapsWindow(mapsUrl);
     }
   };
 
   const checkInFormatted = formatDateTime(accommodation.checkIn);
   const checkOutFormatted = formatDateTime(accommodation.checkOut);
   const stayDuration = calculateDuration(accommodation.checkIn, accommodation.checkOut);
+  const normalizedRoutes = Array.isArray(accommodation.routes)
+    ? accommodation.routes
+    : Object.values(accommodation.routes || {});
+  const stationLabel = accommodation.subwayStation || accommodation.nearbyStation || "";
+  const subwayLine = accommodation.subwayLine || "";
 
   return (
     <div className="confirmed-ticket-container">
@@ -78,7 +93,7 @@ const ConfirmedAccommodationTicket = ({ accommodation }) => {
 
       {/* Additional Information */}
       <div className="accommodation-ticket-details">
-        {(accommodation.address || accommodation.nearbyStation) && (
+        {(accommodation.address || stationLabel || accommodation.mapsUrl) && (
           <div className="ticket-location-row">
             {accommodation.address && (
               <div className="ticket-detail-item clickable" onClick={handleAddressClick}>
@@ -89,12 +104,23 @@ const ConfirmedAccommodationTicket = ({ accommodation }) => {
               </div>
             )}
 
-            {accommodation.nearbyStation && (
+            {stationLabel && (
               <div className="ticket-detail-item">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="detail-icon">
                   <path d="M12 2C8 2 6 3 6 6v8c0 2.21 1.79 4 4 4h4c2.21 0 4-1.79 4-4V6c0-3-2-4-6-4zM7.5 17c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM17 11H7V7h10v4zM7 19l-1 1.5v.5h12v-.5L17 19H7z"/>
                 </svg>
-                <span className="detail-text">{accommodation.nearbyStation}</span>
+                <div className="station-label-group">
+                  {subwayLine && <span className="subway-line-pill">{subwayLine}</span>}
+                  <span className="detail-text">{stationLabel}</span>
+                </div>
+              </div>
+            )}
+            {accommodation.mapsUrl && (
+              <div className="ticket-detail-item clickable" onClick={() => openMapsWindow(accommodation.mapsUrl)}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="detail-icon">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                <span className="detail-text">開啟 Google 地圖</span>
               </div>
             )}
           </div>
@@ -108,6 +134,36 @@ const ConfirmedAccommodationTicket = ({ accommodation }) => {
                 <span key={index} className="tag tag-amenity-compact">{amenity}</span>
               ))}
             </div>
+          </div>
+        )}
+
+        {normalizedRoutes.length > 0 && (
+          <div className="ticket-detail-section routes-summary">
+            <div className="section-label">路線規劃</div>
+            <ul className="route-summary-list">
+              {normalizedRoutes.map((route, index) => (
+                <li key={route.id || `route-${index}`} className="route-summary-item">
+                  <div className="route-summary-destination">
+                    {route.destinationName || "目的地"}
+                  </div>
+                  <div className="route-summary-meta">
+                    {route.transportMode && <span>{route.transportMode}</span>}
+                    {route.line && <span> · {route.line}</span>}
+                    {route.station && <span> · 由 {route.station} 出發</span>}
+                  </div>
+                  {route.requiresTransfer && route.transferSegments && route.transferSegments.length > 0 && (
+                    <div className="route-summary-transfer">
+                      轉乘：
+                      {route.transferSegments
+                        .map((segment) =>
+                          segment.line ? `${segment.line} ${segment.station}` : segment.station
+                        )
+                        .join(" → ")}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 

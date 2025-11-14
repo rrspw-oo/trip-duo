@@ -38,25 +38,8 @@ const PreTripTab = ({
   onClearConfirmedFlight,
 
   // Accommodation props
-  accommodations,
-  newAccommodation,
-  setNewAccommodation,
-  editingAccommodationId,
-  editedAccommodation,
-  onAddAccommodation,
-  onStartEditAccommodation,
-  onSaveEditAccommodation,
-  onCancelEditAccommodation,
-  onDeleteAccommodation,
-  onUpdateEditedAccommodationField,
-  onAccommodationVote,
-  onAddAccommodationComment,
-  onDeleteAccommodationComment,
-  selectedAccommodationId,
-  onSelectAccommodation,
-  onConfirmAccommodation,
   confirmedAccommodation,
-  onUpdateConfirmedAccommodation,
+  onSaveConfirmedAccommodation,
   onClearConfirmedAccommodation,
 
   // Pre-trip items props
@@ -132,28 +115,8 @@ const PreTripTab = ({
 
         {activePreTripSubTab === 3 && (
           <AccommodationTab
-            accommodations={accommodations}
-            newAccommodation={newAccommodation}
-            setNewAccommodation={setNewAccommodation}
-            editingId={editingAccommodationId}
-            editedAccommodation={editedAccommodation}
-            onAddAccommodation={onAddAccommodation}
-            onStartEdit={onStartEditAccommodation}
-            onSaveEdit={onSaveEditAccommodation}
-            onCancelEdit={onCancelEditAccommodation}
-            onDeleteAccommodation={onDeleteAccommodation}
-            onUpdateEditedField={onUpdateEditedAccommodationField}
-            onVote={onAccommodationVote}
-            onAddComment={onAddAccommodationComment}
-            onDeleteComment={onDeleteAccommodationComment}
-            currentUser={currentUser}
-            startDate={startDate}
-            endDate={endDate}
-            selectedAccommodationId={selectedAccommodationId}
-            onSelectAccommodation={onSelectAccommodation}
-            onConfirmAccommodation={onConfirmAccommodation}
             confirmedAccommodation={confirmedAccommodation}
-            onUpdateConfirmedAccommodation={onUpdateConfirmedAccommodation}
+            onSaveConfirmedAccommodation={onSaveConfirmedAccommodation}
             onClearConfirmedAccommodation={onClearConfirmedAccommodation}
           />
         )}

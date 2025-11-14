@@ -23,20 +23,9 @@ const AccommodationForm = ({ newAccommodation, setNewAccommodation, onAddAccommo
   };
 
   const handleAddAccommodation = () => {
-    // Call the add function
-    onAddAccommodation();
-
-    // Check if all required fields are filled to determine success
-    if (
-      newAccommodation.name &&
-      newAccommodation.checkIn &&
-      newAccommodation.checkOut &&
-      newAccommodation.price
-    ) {
-      // If successful, call the success callback
-      if (onAddSuccess) {
-        onAddSuccess();
-      }
+    const success = onAddAccommodation();
+    if (success && onAddSuccess) {
+      onAddSuccess();
     }
   };
 
