@@ -10,6 +10,14 @@
   --color-deep-earth: #8B6F5C;       /* Deep earth - text */
   --color-soft-yellow: #F4D58D;      /* Soft yellow - highlights */
 
+  /* Travel PWA Color Palette */
+  --color-coral-pink: #D76C82;       /* Coral Pink - primary accent */
+  --color-peach: #FFB4A2;            /* Peach - secondary accent */
+  --color-rose-pink: #E5989B;        /* Rose Pink - tags and labels */
+  --color-mauve-gray: #B5828C;       /* Mauve Gray - primary text and borders */
+  --color-cream: #EBE8DB;            /* Cream - secondary backgrounds */
+  --color-light-peach: #FFCDB2;      /* Light Peach - hover states */
+
   /* Surface Colors - Natural and organic */
   --surface-bg: #FFFEF9;             /* Soft white with warmth */
   --surface-secondary: #F4E4D4;      /* Warm sand */

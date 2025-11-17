@@ -9,11 +9,12 @@ const TravelTimeTab = ({
   setEndDate,
   onCalculateDays,
 }) => {
-  const hasDateChanged = useMemo(() => {
-    if (!startDate || !endDate || totalDays === 0) return true;
+  const canCalculate = useMemo(() => {
+    if (!startDate || !endDate) return false;
     const start = new Date(startDate);
     const end = new Date(endDate);
-    if (start >= end) return true;
+    if (start >= end) return false;
+    if (totalDays === 0) return true;
     const calculatedDays = differenceInDays(end, start) + 1;
     return calculatedDays !== totalDays;
   }, [startDate, endDate, totalDays]);
@@ -40,12 +41,8 @@ const TravelTimeTab = ({
       </div>
       <button
         onClick={onCalculateDays}
-        className="btn"
-        disabled={!hasDateChanged}
-        style={{
-          opacity: hasDateChanged ? 1 : 0.5,
-          cursor: hasDateChanged ? "pointer" : "not-allowed",
-        }}
+        className="btn btn-neutral btn-full-width"
+        disabled={!canCalculate}
       >
         計算天數
       </button>

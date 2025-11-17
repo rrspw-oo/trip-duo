@@ -181,6 +181,7 @@ const LocationForm = ({
     name: poi.name?.trim() || "",
     address: poi.address?.trim() || "",
     visitTime: poi.visitTime || "",
+    openingHours: poi.openingHours || { start: "", end: "", days: [] },
     note: poi.note?.trim() || "",
   });
 
@@ -517,16 +518,6 @@ const LocationForm = ({
           <div className="planner-poi-title">
             <strong>地點安排</strong>
           </div>
-          {!isPoiFormVisible && (
-            <button
-              type="button"
-              className="btn btn-soft planner-poi-add"
-              onClick={() => toggleRoutePoiForm(route.id, true)}
-              disabled={!canAddPoi}
-            >
-              + 新增地點
-            </button>
-          )}
         </div>
         <div className="planner-poi-body">
           {route.pois && route.pois.length > 0 ? (
@@ -816,6 +807,16 @@ const LocationForm = ({
                 </button>
               </div>
             </div>
+          )}
+          {!isPoiFormVisible && (
+            <button
+              type="button"
+              className="btn btn-soft planner-poi-add"
+              onClick={() => toggleRoutePoiForm(route.id, true)}
+              disabled={!canAddPoi}
+            >
+              + 新增地點
+            </button>
           )}
         </div>
       </div>

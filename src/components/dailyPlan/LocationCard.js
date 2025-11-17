@@ -35,6 +35,16 @@ const LocationCard = ({ location, day, index, onRemove, onEdit }) => {
     window.open(mapsUrl, "_blank", "noopener,noreferrer");
   };
 
+  const WEEKDAYS = [
+    { key: "Mon", label: "M" },
+    { key: "Tue", label: "T" },
+    { key: "Wed", label: "W" },
+    { key: "Thu", label: "Th" },
+    { key: "Fri", label: "F" },
+    { key: "Sat", label: "Sa" },
+    { key: "Sun", label: "Su" }
+  ];
+
   const renderPoiCard = (
     poi,
     poiIndex,
@@ -44,6 +54,12 @@ const LocationCard = ({ location, day, index, onRemove, onEdit }) => {
     const address = poi.address || "";
     const cardClass =
       variant === "route" ? "poi-card route-poi-card" : "poi-card";
+    const displayTime = poi.openingHours?.start
+      ? `${poi.openingHours.start}${poi.openingHours.end ? ` - ${poi.openingHours.end}` : ''}`
+      : poi.visitTime || "—";
+    const openingDays = poi.openingHours?.days || [];
+    const hasOpeningInfo = displayTime !== "—" || openingDays.length > 0;
+
     return (
       <li key={poi.id || `poi-${poiIndex}`} className={cardClass}>
         <div className="poi-index">{poiIndex + 1}</div>
@@ -52,26 +68,38 @@ const LocationCard = ({ location, day, index, onRemove, onEdit }) => {
             <span className="poi-card-title">
               {poi.name || `地點 ${poiIndex + 1}`}
             </span>
-            {poi.visitTime && (
-              <span className="poi-card-time">{poi.visitTime}</span>
-            )}
           </div>
-          {variant === "route" && routeIndex !== null && (
-            <span className="poi-route-label">路線 {routeIndex + 1}</span>
+          {hasOpeningInfo && (
+            <div className="poi-opening-info">
+              {displayTime !== "—" && (
+                <div className="poi-meta-item">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8.01 8.01 0 0 1-8 8zm.5-13h-1v5l4.25 2.52.5-.86-3.75-2.21z" />
+                  </svg>
+                  <span>{displayTime}</span>
+                </div>
+              )}
+              {openingDays.length > 0 && (
+                <div className="day-selector day-selector-readonly">
+                  {WEEKDAYS.map(({ key, label }) => (
+                    <span
+                      key={key}
+                      className={`day-btn ${openingDays.includes(key) ? "selected" : ""}`}
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
           <div className="poi-meta">
-            <div className="poi-meta-item">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8.01 8.01 0 0 1-8 8zm.5-13h-1v5l4.25 2.52.5-.86-3.75-2.21z" />
-              </svg>
-              <span>{poi.visitTime || "—"}</span>
-            </div>
             {address && (
               <button
                 type="button"
